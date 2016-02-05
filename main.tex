@@ -1,0 +1,30 @@
+\documentclass[12pt,a4paper]{report}
+
+% Packages that we are going to use
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{combelow}% provides \cb to place comma below character
+\usepackage{newunicodechar}
+\usepackage[romanian]{babel}
+\usepackage{graphicx}
+\usepackage{subfiles}
+\usepackage{blindtext}
+\usepackage[export]{adjustbox}
+
+\graphicspath{{images/}{../images/}}
+
+\newunicodechar{ș}{\cb{s}}
+\newunicodechar{ț}{\cb{t}}
+
+
+\begin{document}
+
+\subfile{sections/title}
+
+\tableofcontents
+
+\newpage
+
+\subfile{sections/introduction}
+
+\end{document}
