@@ -40,13 +40,13 @@ Tactica pe care o vom folosi este aceea de a dezvolta o arhitectură distribuit�
 
 Pentru a putea îndeplini toate calitățile arhitecturale enumerate anterior, vom examina o suită de stiluri arhitecturale, pentru a putea observa care dintre acestea este mai potrivit pentru un sistem de experimentare. În mod evident, stilurile arhitecturale de tipul \textit{data-flow} sau \textit{batch-processing} nu se pliază cerințelor sistemului, întrucât experimentele trebuie să poată fi adăugate sau șterse cu ușurință, oferind o velocitate crescută. Se observă faptul că un sistem de tipul client-server este cel mai indicat pentru a fi folosit în situația de față. Cu toate acestea, după cum am menționat anterior, dorim să oferim posibilitatea clienților de a extinde foarte ușor sistemul de experimentare, pentru a-l particulariza conform cerințelor acestora. Acest lucru însă nu este foarte ușor de realizat, mai ales în condițiile în care aplicație este dezvoltată sub forma unui monolit.
 
-Calitățile arhitecturale expuse, dar și scopul sistemului, ne îndrumă către o arhitectură bazată pe servicii. In mod imediat, abordarea clasicDe aceea, lucrarea propune o abordare arhitecturală mai nouă, bazată pe \textbf{\textit{microservicii}}. 
+Calitățile arhitecturale expuse, dar și scopul sistemului, ne îndrumă către o arhitectură bazată pe servicii. In mod imediat, abordarea clasică pe care o putem urma este aceea de \textit{SOA}\footnote{Service Oriented Architecture - Arhitectură orientată pe servicii}. Aceast tip de arhitectură are însă dezavantajul de a fi destul de complexă, iar în final modulele componente nu devin independente, ci autonome. De aceea, lucrarea propune o abordare arhitecturală mai nouă, bazată pe \textbf{\textit{microservicii}}.\cite{buildingmicro} 
 
 \subsection{Arhitectura bazată pe microservicii}
 
 Arhitecturile bazate pe microservicii reprezintă un nou mod de abordare a aplicațiilor, care se diferențiază segmentarea fiecărui modul al aplicației într-un serviciu independent. Aceste servicii pot comunica prin intermediul unui mecanism ce presupune un \textit{overhead} minimal, de obicei acest mecanism fiind protocolul HTTP\cite{onmicro}. Motivația principală ce stă la baza acestei arhitecturi constă în posibilitatea de a pune în producție fiecare dintre aceste servicii indepdent de celelalte, iar acest lucru duce la o viteză crescută de dezvoltare.
 
-Unul din motivele pentru care microserviciile au reușit să fie adoptate de un număr relativ mare de companii, printre care menționăm și \textit{Netflix}, într-un timp atât de scurt, se datorează și apariției tehnologiilor noi precum \textit{Docker}, ce permit rularea unei aplicații în interiorul unui \textit{container}, complet izolat de restul aplicațiilor de pe aceeași mașină. Prin container înțelegem un strat de abstractizare, superior din punctul de vedere al performanței față de mașinile virtuale. Astfel un \textit{container} încapsulează toate dependențele necesare unei aplicații, dar împarte același \textit{kernel} al sistemului de operare cu restul containerelor. 
+Unul din motivele pentru care microserviciile au reușit să fie adoptate de un număr relativ mare de companii, printre care menționăm \textit{Google}, \textit{Amazon} și \textit{Netflix}, într-un timp atât de scurt, se datorează și apariției tehnologiilor noi precum \textit{Docker}, ce permit rularea unei aplicații în interiorul unui \textit{container}, complet izolat de restul aplicațiilor de pe aceeași mașină. Prin container înțelegem un strat de abstractizare, superior din punctul de vedere al performanței față de mașinile virtuale. Astfel un \textit{container} încapsulează toate dependențele necesare unei aplicații, dar împarte același \textit{kernel} al sistemului de operare cu restul containerelor. 
 
 \subsubsection{Avantaje}
 
@@ -54,8 +54,69 @@ Spre deosebire de aplicațiile clasice ce tip monolit, acest tip de aplicații d
 
 Un alt avantaj evident este reprezentat de ușurința de a scala foarte ușor o platformă bazată pe microservicii. Acest lucru se poate realiza prin rularea a multiple instanțe ale unui serviciu, în spatele unui \textit{load-balancer}. Din nou se poate observa cum fracționarea sistemului conduce către o flexibilitate sporită, pe care o aplicație clasică nu o poate oferi. Posibilitatea de a scala doar componentele necesare reduc costul de rulare a aplicației.
 
+Compunerea serviciilor este un alt aspect interesant, ce este facilitat de acest tip de arhitectură. De exemplu, tot mai multe aplicații trebuie să ofere o experiența unitară, pe mai multe platforme, ce permite utilizatorilor să schimbe platforma în mijlocul unei sesiuni de lucru. Prin segmentarea corectă a aplicației se vor putea compune serviciile pentru a reutiliza serviciile necesare pentru toți clienții, în timp ce va exista posibilitatea de dezvoltare a unor servicii specializate pentru tipuri particulare de platforme. 
+
 Nu în ultimul rând trebuie amintită viteza de dezvoltare și de punere în producție a sistemului ce este una cu mult superioară față de aplicațiile clasice, monolitice. După cum am menționat anterior, fiecare serviciu este dezvoltat și lansat în mod independent fața de celelalte. Acest fapt oferă posibilitatea de a scala dezvoltarea aplicației prin descentralizarea acesteia. Fiecare serviciu nu va depinde de celelalte, iar acest fapt îmbunătățesc efectele unor metodologii de iterare rapidă precum integrarea continuă.
 
 \subsubsection{Dezavantaje}
 
-Desigur, pe lângă avantajele evidente, menționate anterior 
+Desigur, pe lângă avantajele evidente, menționate anterior, există și o serie de dezavantaje pe care arhitectura bazată pe microservicii le prezintă\cite{onmicro}. Primul dezavantaj evident este acela al complexitații necesare punerii în producție a fiecărui serviciu, în mod individual, și orchestarea tuturor serviciilor ca un ansamblu. Există însă o întreagă suită de servicii ce orchestrare ce vin în ajutorul dezvoltatorilor pentru a putea minimiza această complexitate, precum \textit{Kubernetes}, dezvoltată de \textit{Google}.
+
+Complexitatea sistemelor distribuite, de care un dezvoltatorii trebuie să țină cont, reprezintă un aspect dificil ar arhitecturii bazate pe microservicii. 
+
+Deși împărțirea aplicației în microservicii duce la ușurarea procesului de testare a fiecărui serviciu, apare o altă problemă și anume aceea a efecutării testării \textit{end-to-end}, sau de integrare, a întregului sistem.
+
+\subsubsection{Concluzie}
+
+Deși prezintă o serie de dezavantaje, lucrarea consideră ca stilul arhitectural bazat pe \textit{microservicii} se pliază cel mai bine pentru un sistem de exeperimentare. Flexibilitatea și extensibilitatea sporită ce sunt oferite de o astfel de arhitectură fața de cele tradiționale, recomandă aceast stil.
+
+\section{Principii arhitecturale}
+
+În secțiunea anterioară am stabilit faptul că vom folosi o arhitectură bazată pe microservicii. În cele ce urmează vom defini un set de principii pe care le vom adopta în dezvoltarea arhitecturii sistemului, împreună cu motivația pentru alegerea acestora. Prin stabilirea acestor principii ne vom ușura misiunea de a segmenta serviciul de experimentare, acest lucru fiind cel mai important și totodatată dificil pas în elaborarea arhitecturii.
+
+\subsubsection{Servicii \textit{stateless}}
+
+Vom impune regula ca toate serviciile să fie considerate \textit{stateless}. Prin acest lucru înțelegem că acestea nu vor încapsula informații legate la starea aplicației. Astfel, în mod teoretic, scalarea serviciului pe orizontală se poate face prin simpla rulare a mai multor instanțe a acestuia. Această regulă sugerează de altfel REST ca și protocol de comunicare între servicii, de altfel acesta fiind protocolul folosit cel mai des în acest tip de arhitectură. \cite{buildingmicro}
+
+\subsubsection{Separarea datelor}
+
+Principiul separării datelor impune tuturor microserviciilor să folosească propria bază de date. Astfel, fiecare microserviciu va alege tipul de bază de date care este cel mai potrivit pentru acest, de exemplu un RDBMS sau o bază de date No-SQL. De asemenea, folosirea unei baze date date comune ar duce la dependențe între microservicii, provocate de folosirea comună a aceleași schema a bazei de date. Astfel, daca un serviciu solicită modificarea acesteia și restul serviciilor care o folosesc vor trebui să fie actualizate, și astfel pierdem din flexibilitatea arhitecturii microserviciilor. Pe de altă parte există posibilitatea de a avea inconsistențe între diferitele baze de date. Pentru soluționarea acestei probleme există așa numitele unelte \textit{Master Data Management}.
+
+\subsubsection{Asocierea serviciu-\textit{container}}
+
+În ceea ce privește modul de rulare a sistemului, există câteva soluții existente. Prima dintre acestea este maparea unui serviciu pe o mașină. Este evident că această strategie este una costisitoare, și nefazabilă pentru companiile mici. O altă soluționare vine din mapare unui serviciu pe o mașină virtuală, dar și această soluție este defectuoasă, deoarece gestionarea mașinilor virtuale reprezintă un proces complex. În final, vom apela la strategia ce presupune maparea unui serviciu în interiorul unui container de Linux. Astfel, vom putea multiplexa multiple servicii pe un număr limitat de mașini prin intermediul unor unelte de orchestrare, cum ar fi \textit{Kubernetes}.
+
+\subsubsection{Expunerea unui API}
+
+Din cauza faptului că arhitectura cu microservicii este foarte flexibilă, pot apărea dificultăți în gestionarea comunicării clientului cu sistemul, fiecare apel trebuind să fie făcut către serviciul corespunzător. Gestionarea unor astfel de apeluri însă nu este recomandată să aibă loc pe partea de client, pentru acesta fiind ideală comunicarea simplă sub forma unui API\footnote{Application Programming Interface}. Soluția acestor probleme vine din adăugarea unei alte componente și anume un \textit{API Gateway} sau un \textit{Reverse Proxy}. Clientul va face astfel mereu apelul către această componentă, care va ruta cererea mai departe serviciului corespunzător. Dezavantajul este acela că se adaugă complexitatea a încă unei componente la sistem, dar lucrarea consideră acest \textit{trade-off} ca fiind benefic. 
+
+\section{Dezvoltarea arhitecturii}
+
+În această secțiune vom descrie și vom construi gradual arhitectura sistemului de experimentare pe care lucrarea îl propune, conformându-ne principiilor enunțate anterior.
+
+\subsection{Identificarea serviciilor}
+
+Vom începe natural pentru arhitectura bazată pe microservicii, indentificând componentele sistemului. După cum am descris anterior, clientul sistemului de experimentare dorește să poată gestiona rapid adăugarea și ștergerea experimentelor. Astfel, conform principiului de separare a datelor, putem identifica un prim serviciu, acela de \textbf{\textit{Experiment Repository}}, sau \textit{Magazia Experimentelor}. Responsabilitatea acestei componente va fi gestionarea experimentelor, acesta având o bază de date asociată. 
+
+Pe lângă componenta identificată deja, avem nevoie de un mecanism de asignare a unei entități către un experiment. O primă idee, intuitivă, spune că putem avea o componentă care va interoga magazia experimentelor și efectua apoi toate sarcinile necesare. Dar, deoarece știm ca dorim să experimentăm, cu mai multe astfel de modalități de asignare a entităților către experimente, și dorim de asemenea ca și clientul aplicației să poată folosi orice abordare dorește acesta, vom avea o componentă separată ce se va ocupa doar de acest lucru, pe care o vom numi \textit{\textbf{Assigner}}. Aceast serviciu se va ocupa exclusiv de gestionarea apratenenței unei entități la id-ul unui grup.
+
+Ne amintim că din perspectiva funcțională a clientului final, acesta dorește ca experiența sa să fie cât mai uniformă. Acest lucru se traduce prin asignarea de fiecare dată a unei entități către aceleași grupuri din anumite experimente. Efectul poate fi obținut prin construcția unui \textit{Assigner} care este determinist. Dar, având în vedere că nu putem forța acest comporatament componentei respective, va trebui să construim o altă componentă, care să stocheze informații referitoare la asignarea inițială a unui utilizator, pe care o vom numi \textit{\textbf{Store}} Astfel, dacă acesta a fost deja asignat unui grup va trebui ca sistemul de experimentare să garanteze că a doua oară când va fi interogat, pentru aceeași entitate, va oferi același răspuns.
+
+Nu în ultimul rând, avem nevoie de un serviciu care să coordoneze si să orchestreze interacțiunile între restul serviciilor, acesta fiind punctul ce va expune un \textit{API} pentru clientul aplicației. Vom denumi acest serviciu ca fiind \textit{\textbf{Experimento}}, acesta luând numele framework-ului de experimente pe care lucrarea îl propune. 
+
+Am indetificat deci 4 microservicii ce vor fi nelipisite din alcătuirea sistemului de bază. Le vom recapitula sumar, pentru a le putea vizualiza ușor.
+
+\begin{itemize}
+	\item \textbf{Experiment Repository:} Gestionează experimentele
+	\item \textbf{Assigner:} Assignează o anumită entitate unui grup dintr-un experiment
+	\item \textbf{Store:} Reține asignarea inițială a unui utilizator
+	\item \textbf{Experimento:} Serviciul principal, care expune \textit{API-ul} serviciului 
+\end{itemize}
+
+\begin{remark}
+	
+\end{remark}
+
+\subsection{Definirea interfețelor}
+
+Vom 
