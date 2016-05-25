@@ -1,0 +1,61 @@
+\chapter{Arhitectura sistemului}
+
+În acest capitol vom construi arhitectura sistemului, astfel încât aceasta să își atingă scopul precizat anterior, ținând cont de proprietățile enumerate pe care soluția trebuie să le aibă. Pentru o descriere mai amplă și mai organizată a arhitecturii vom apela la metologiile clasice folosite în dezvoltarea arhitecturilor software.
+
+\section{Părțile implicate}
+
+Părțile implicate, sau \textit{stakeholderii} cum mai sunt numite acestea în literatură, sunt în număr de 3. Avem astfel dezvoltatorul sistemului de experimentare, clientul sistemului (dezvoltatorul aplicației principale) și utilizatorul final. Ne vom concentra în cele ce urmează pe ultimele două părți.
+
+\textbf{\textit{Clientul sistemului}} este reprezentat de dezvoltatorul serviciului ce necesită efectuarea experimentelor. Astfel, acesta dorește să poată folosi cât mai ușor sistemul de experimentare, prin intermediul unui număr cât mai mare de limbaje de programare. Interesul acestuia este ca serviciul pe care lucrarea îl propune să fie cât mai flexibil și extensibil, pentru a oferi astfel acestuia posibilitatea de a fructifica cât mai multe oportunități, evitând adăugarea de complexitatea suplimentară a aplicației inițiale, prin gestionarea experimentelor în codul aplicației.
+
+\textbf{\textit{Utilizatorul final}} este cel care utilizează aplicația principală. Acesta dorește ca aplicația să poată fi folosită rapid, iar acest lucru înseamna că serviciul pe care lucrarea îl propune nu trebuie să reprezinte un \textit{bottleneck}\footnote{O componentă ce încetinește întreg sistemul} pentru întreaga aplicație.
+
+\subsection{Perspectiva funcțională}
+
+Având părțile implicate definite, vom trece mai departe să definim perspectiva funcțională a fiecăreia dintre acestea.
+
+\textbf{\textit{Clientul sistemului}} va dori să poată să adauge experimente, să șteargă experimente, și să poată vizualiza lista cu experimentele disponibile. Va putea de asemenea să definească lista cu valorile variabileleor pe care acestea le pot lua în cadrul unui experiment. De asemenea, în codul aplicației principale va dori să facă un apel cu parametrii identificatorul experimentului și identificatorul entității, și să obțină astfel toți parameterii variabileleor pentru toate experimentele în care se află entitate respectivă.
+
+\textbf{\textbf{Utilizatorul final}}, fiind cel care va fi inclus în anumite experimente, dorește ca experiența sa să fie una cât mai uniformă în cadrul aplicației principale. Din acest lucru reiese ca sistemul de experimentare va trebui să mapaze în mod consistent o entitate în cadrul aceluiași grup dintr-un experiment. 
+
+\section{Calități arhitecturale de sistem}
+
+Vom prezenta în cele ce urmează calitățile arhitecturale de sistem ce sunt importante pentru sistemul pe care dorim să îl dezvoltăm. În același timp vom menționa tacticile și stilurile arhitecturale pe care le vom folosi pentru a implementa aceste calități.
+
+\textbf{\textit{Adaptabilitatea}} este una din cele mai importante calități arhitecturale de sistem pentru un serviciu de experimentare. După cum am menționat anterior, considerăm vitală posibilitatea de a adăuga funcționalități foarte ușor la sistemul dezvoltat.
+
+Pentru a putea satisface această calitate arhitecturală, vom folosi o serie de diverse tactici. Prima tactică este aceea de a efectua o abstractizare a modulelor sistemului astfel încât să existe cât mai puține dependențe între acestea. De asemenea vom folosi \textit{coerența semantică}, prin care fiecare modul va avea o funcționalitatea bine definită, iar relațiile între acestea vor fi definite riguros. Astfel, de fiecare dată când vom executa o modificare vom putea identifica toate modulele ce necesită modificări.
+
+\textbf{\textit{Disponibilitatea}} este o alta calitate arhitecturală importantă. În orice aplicație modernă, experimentarea reprezintă un element primordial, aceasta regăsindu-se atât pe partea de \textit{frontend} cât și pe partea de \textit{backend}. De aceea trebuie ca serviciul de experimentare să fie disponibil cât mai mult timp, și să se limiteze  perioada de \textit{downtime}\footnote{Durata de timp în care sistemul nu este disponibil.}.
+
+Tactica pe care o vom folosi este aceea de a dezvolta o arhitectură distribuită, astfel încât să evităm existentă unui \textit{single point of failure}\footnote{O componentă a sistemului care în caz de eroare compromite întreg sistemul}. Detectarea erorilor se va face folosind o tactică de tipul \textit{heartbeat}, în care vom verifica periodic starea unei componente a sistemului. Astfel, fiecare modul al aplicației, identificat anterior, în cazul în care nu va funcționa nu va compromite sistemul, deoarece responsabilitățile acestuia vor fi preluate de un alt modul identic ce va funcționa pe o altă mașină.
+
+\textbf{\textit{Scalabilitatea}} sistemului este esențială. Ne dorim ca produsul să poată fi folosit atât de companii mici, \textit{start-up-uri}, dar și de companii mai mari, iar acest lucru presupune posibilitatea de a rula sistemul pe o gamă variată de resurse. Prin rularea distribuită, vom putea scala sistemul pe orizontală, prin adăugarea de mai multe servere, evitând astfel scalarea pe verticală, ce presupune mărirea resurselor mașinilor pe care este rulată aplicația, acest lucru fiind foarte costisitor.
+
+\textbf{\textit{Performanța}} reprezintă o calitate arhitecturală pe care trebuie să o urmărim cu atenție. Pentru a obține o performanță cât mai bună, vom folosi tactica gestionării resurselor, introducând concurența în interiorul sistemului. Având în vedere faptul că vom avea foarte multe cereri către sistem, ce vor trebui rezolvate în același timp, este natural să urmăm o astfel de tactică.  
+
+%TODO: Senariu QA ?! 
+
+\section{Stilul arhitectural}
+
+Pentru a putea îndeplini toate calitățile arhitecturale enumerate anterior, vom examina o suită de stiluri arhitecturale, pentru a putea observa care dintre acestea este mai potrivit pentru un sistem de experimentare. În mod evident, stilurile arhitecturale de tipul \textit{data-flow} sau \textit{batch-processing} nu se pliază cerințelor sistemului, întrucât experimentele trebuie să poată fi adăugate sau șterse cu ușurință, oferind o velocitate crescută. Se observă faptul că un sistem de tipul client-server este cel mai indicat pentru a fi folosit în situația de față. Cu toate acestea, după cum am menționat anterior, dorim să oferim posibilitatea clienților de a extinde foarte ușor sistemul de experimentare, pentru a-l particulariza conform cerințelor acestora. Acest lucru însă nu este foarte ușor de realizat, mai ales în condițiile în care aplicație este dezvoltată sub forma unui monolit.
+
+Calitățile arhitecturale expuse, dar și scopul sistemului, ne îndrumă către o arhitectură bazată pe servicii. In mod imediat, abordarea clasicDe aceea, lucrarea propune o abordare arhitecturală mai nouă, bazată pe \textbf{\textit{microservicii}}. 
+
+\subsection{Arhitectura bazată pe microservicii}
+
+Arhitecturile bazate pe microservicii reprezintă un nou mod de abordare a aplicațiilor, care se diferențiază segmentarea fiecărui modul al aplicației într-un serviciu independent. Aceste servicii pot comunica prin intermediul unui mecanism ce presupune un \textit{overhead} minimal, de obicei acest mecanism fiind protocolul HTTP\cite{onmicro}. Motivația principală ce stă la baza acestei arhitecturi constă în posibilitatea de a pune în producție fiecare dintre aceste servicii indepdent de celelalte, iar acest lucru duce la o viteză crescută de dezvoltare.
+
+Unul din motivele pentru care microserviciile au reușit să fie adoptate de un număr relativ mare de companii, printre care menționăm și \textit{Netflix}, într-un timp atât de scurt, se datorează și apariției tehnologiilor noi precum \textit{Docker}, ce permit rularea unei aplicații în interiorul unui \textit{container}, complet izolat de restul aplicațiilor de pe aceeași mașină. Prin container înțelegem un strat de abstractizare, superior din punctul de vedere al performanței față de mașinile virtuale. Astfel un \textit{container} încapsulează toate dependențele necesare unei aplicații, dar împarte același \textit{kernel} al sistemului de operare cu restul containerelor. 
+
+\subsubsection{Avantaje}
+
+Spre deosebire de aplicațiile clasice ce tip monolit, acest tip de aplicații distribuite au un avantaj foarte interesant, ce provine din faptul că fiecare serviciu component al său poate fi scris în orice limbaj de programare, atât timp cât poate efectua comunicarea cu restul serviciilor. Ca o consecință naturală, acest fapt oferă o flexibilitate mult mai mare dezvoltatorilor, conferind libertatea de a alege mult mai ușor tehnologie aparte ce se pliază problemei particulare pe care dorește să o rezolve serviciul. Implicit, prin fragmentarea aplicației se pot efectua mult mai ușor și tranzițiile către alte tehnologii, lucru ce este foarte greu, sau de mult ori imposibil de efectuat în contextul unei aplicații monolotice, unde se folosește aceeași tehnologie pentru întregul sistem.
+
+Un alt avantaj evident este reprezentat de ușurința de a scala foarte ușor o platformă bazată pe microservicii. Acest lucru se poate realiza prin rularea a multiple instanțe ale unui serviciu, în spatele unui \textit{load-balancer}. Din nou se poate observa cum fracționarea sistemului conduce către o flexibilitate sporită, pe care o aplicație clasică nu o poate oferi. Posibilitatea de a scala doar componentele necesare reduc costul de rulare a aplicației.
+
+Nu în ultimul rând trebuie amintită viteza de dezvoltare și de punere în producție a sistemului ce este una cu mult superioară față de aplicațiile clasice, monolitice. După cum am menționat anterior, fiecare serviciu este dezvoltat și lansat în mod independent fața de celelalte. Acest fapt oferă posibilitatea de a scala dezvoltarea aplicației prin descentralizarea acesteia. Fiecare serviciu nu va depinde de celelalte, iar acest fapt îmbunătățesc efectele unor metodologii de iterare rapidă precum integrarea continuă.
+
+\subsubsection{Dezavantaje}
+
+Desigur, pe lângă avantajele evidente, menționate anterior 
