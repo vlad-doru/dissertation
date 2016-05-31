@@ -96,27 +96,169 @@ Din cauza faptului că arhitectura cu microservicii este foarte flexibilă, pot 
 
 \subsection{Identificarea serviciilor}
 
-Vom începe natural pentru arhitectura bazată pe microservicii, indentificând componentele sistemului. După cum am descris anterior, clientul sistemului de experimentare dorește să poată gestiona rapid adăugarea și ștergerea experimentelor. Astfel, conform principiului de separare a datelor, putem identifica un prim serviciu, acela de \textbf{\textit{Experiment Repository}}, sau \textit{Magazia Experimentelor}. Responsabilitatea acestei componente va fi gestionarea experimentelor, acesta având o bază de date asociată. 
+Vom începe natural pentru arhitectura bazată pe microservicii, indentificând componentele sistemului. După cum am descris anterior, clientul sistemului de experimentare dorește să poată gestiona rapid adăugarea și ștergerea experimentelor. Astfel, conform principiului de separare a datelor, putem identifica un prim serviciu, acela de \textbf{\textit{Repository}}, sau \textit{Magazia Experimentelor}. Responsabilitatea acestei componente va fi gestionarea experimentelor, acesta având o bază de date asociată. 
 
 Pe lângă componenta identificată deja, avem nevoie de un mecanism de asignare a unei entități către un experiment. O primă idee, intuitivă, spune că putem avea o componentă care va interoga magazia experimentelor și efectua apoi toate sarcinile necesare. Dar, deoarece știm ca dorim să experimentăm, cu mai multe astfel de modalități de asignare a entităților către experimente, și dorim de asemenea ca și clientul aplicației să poată folosi orice abordare dorește acesta, vom avea o componentă separată ce se va ocupa doar de acest lucru, pe care o vom numi \textit{\textbf{Assigner}}. Aceast serviciu se va ocupa exclusiv de gestionarea apratenenței unei entități la id-ul unui grup.
 
 Ne amintim că din perspectiva funcțională a clientului final, acesta dorește ca experiența sa să fie cât mai uniformă. Acest lucru se traduce prin asignarea de fiecare dată a unei entități către aceleași grupuri din anumite experimente. Efectul poate fi obținut prin construcția unui \textit{Assigner} care este determinist. Dar, având în vedere că nu putem forța acest comporatament componentei respective, va trebui să construim o altă componentă, care să stocheze informații referitoare la asignarea inițială a unui utilizator, pe care o vom numi \textit{\textbf{Store}} Astfel, dacă acesta a fost deja asignat unui grup va trebui ca sistemul de experimentare să garanteze că a doua oară când va fi interogat, pentru aceeași entitate, va oferi același răspuns.
+
+\begin{remark}
+	Dacă serviciul Assigner este determinist atunci nu este necesară existența serviciului Store. 
+\end{remark}
 
 Nu în ultimul rând, avem nevoie de un serviciu care să coordoneze si să orchestreze interacțiunile între restul serviciilor, acesta fiind punctul ce va expune un \textit{API} pentru clientul aplicației. Vom denumi acest serviciu ca fiind \textit{\textbf{Experimento}}, acesta luând numele framework-ului de experimente pe care lucrarea îl propune. 
 
 Am indetificat deci 4 microservicii ce vor fi nelipisite din alcătuirea sistemului de bază. Le vom recapitula sumar, pentru a le putea vizualiza ușor.
 
 \begin{itemize}
-	\item \textbf{Experiment Repository:} Gestionează experimentele
+	\item \textbf{Repository:} Gestionează experimentele
 	\item \textbf{Assigner:} Assignează o anumită entitate unui grup dintr-un experiment
 	\item \textbf{Store:} Reține asignarea inițială a unui utilizator
 	\item \textbf{Experimento:} Serviciul principal, care expune \textit{API-ul} serviciului 
 \end{itemize}
 
 \begin{remark}
-	
+	Serviciul \textit{Experimento} reprezintă componenta centrală a sistemului, iar dezvoltarea corectă a acestuia este critică.
 \end{remark}
+
+\subsection{Descrierea mesajelor}
+
+Într-o arhiectură bazată pe microservicii este foarte importantă comunicarea ce se realizează între componente. De aceea, soluția naturală este aceea de a standardiza mesajele, și a comunica folosind un anumit format, pentru a evita posibilele discrepanțe.
+
+Deși există un număr mare de librării ce sunt folosite pentru serializarea și deserializarea mesjaelor, cât și pentru efectuarea de apeluri de tip \textit{RPC}\footnote{Remote procedure call}, precum \textit{Protocol Buffers}, \textit{Apache Thrift}, \textit{Message Pack}, ș.a.m.d, toate acestea folosind un format binar, de multe ori alegerea \textit{de facto} este aceea a mesajelor de tip JSON. În cele ce urmează vom încerca să definim mesajele pe care le vom folosi pentru comunicare într-un mod cât mai simplu, astfel încât să putem implementa această structură folosind oricare din bibliotecile menționate anterior. Sintaxa în care vom descrie structurile este aceea a limbajului de programare \textit{Go}.
+
+Mesajul principal ce va sta la baza sistemului de experimentarea este acela ce va descrie complet un experiment. Va trebui să încapsulăm informații referitoare la variabilele experimentului, grupurile acestuia, dar și alte informații auxiliare. Acesta va avea următoarea structură:
+
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+type Description struct {
+Info              // Informatii generale
+Started time.Time // Startul experimentului
+
+VariablesInfo map[string]VariableOptions
+Groups        map[string]GroupDescription
+Whitelist     map[string]string
+}
+	\end{lstlisting}
+\end{center}
+
+Se identifică trei mesaje ce vor trebui definite: \textit{Info}, \textit{VariableOptions}, alături de \textit{GroupDescription}.
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+type Info struct {
+ID        string  // indetificatorul unui experiment
+SeedValue string  // valoarea seed-ului
+Size      float64 // dimensiunea experimentului
+}
+	\end{lstlisting}
+\end{center}
+
+\begin{remark}
+	Câmpul \textbf{SeedValue} este folosit pentru a putea controla replicabilitatea rezultatelor unui experiment, în timp ce câmpul \textbf{Size} va avea o valoare între 0 și 1, ce va reprezenta fracția entităților ce va lua parte la experiment.
+\end{remark}
+
+\begin{lstlisting}[language=Golang]
+type VariableOptions []string
+\end{lstlisting}
+
+Vom exprima lista de posibile alegeri ale unei variabile ca un vector de șiruri de caractere. Am ales această abordare deoarece ea este foarte simplă, și minimizează efortul necesar elaborării și înțelegerii unui experiment.
+
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+type GroupDescription struct {
+StartSize float64
+Variables map[string]string
+}
+	\end{lstlisting}
+\end{center}
+
+Deoarece, imediat cum un experiment a fost adăugat, nu există informații \textit{a priori}, va trebui ca pentru un experiment, indiferent de ce \textit{Assigner} va fi folosit pentru acesta, să specifice dimensiunea de început a grupului, prin intermediul câmpului \textit{StartSize}. Aceasta are rol orientativ, pentru a știi modul de asignare a entităților către anumite experimenete, atunci când nu există alte informații. De asemenea, această informație poate fi folosită și atunci când un assigner folosește un mecanism de tip \textit{holdout}, pentru a determina distribuția entităților ce fac parte din acesta. De aceea, va trebui ca suma acestui câmp peste toate grupurile experimentului să fie egală cu 1.
+
+Câmpul \textit{Variables} asociează fiecărei variabile o anumită valoare pentru aceasta. Menționăm că trebuie efectuată verificarea astfel încât valoarea variabilei să fie validă, adică specificată anterior în \textit{VariableOptions}.
+
 
 \subsection{Definirea interfețelor}
 
-Vom 
+Fiecare din microserviiciile identificate a fost descris din punct de vedere funcțional, explicând rolul și cerințele acestuia. Framework-ul pe care lucrarea dorește șa îl dezvolte va propune o implementarea concretă pentru micro-serviciul \textit{Experimento}, unică. Pentru celelalte trei microservicii indentificate, le vom descrie sub forma unor interfețe. Vom dezvolta mai apoi o serie de implmenetări concrete pentru acestea. În definierea metodelor, ne vom folosi de mesajele definite anterior, ce vor fi standardizate pe parcursul aplicației, în descrierea interfețelor.
+
+\begin{remark}
+	Vom încerca să definim interfețele într-un mod cât mai minimal, pentru a putea oferi o flexibilitatea mare programatorului.
+\end{remark}
+
+\subsubsection{Repository}
+
+Deși responsabilitatea principală a microserviciului \textit{Repository} este aceea de a gestiona experimentele, nu vom include în această interfața metode referitoare la aceste acțiuni. Motivul principal este acela de a oferi utilizatorilor serviciului o flexibilitatea cât mai mare în a-și scrie propriul lor microserviciu pentru gestiunea experimentelor. Astfel, singura metodă pe care interfața \textit{Repository} va trebui să o implementeze este aceea care oferă lista tuturor experimentelor active. Motivul este acela că microserviciul \textit{Experimento} va avea nevoie de aceasta pentru a putea întoarce valorile variabilelor pentru toate experimentele unei entități. Dorim această abordare de a obține toate valorile experimentelor în \textit{batch} pentru a putea evita suprasolicitarea serviciului de experimentare. Rămâne astfel datoria clientului să updateze în mod regulat lista cu experimentele din care face parte clientul. 
+
+
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+type Repository interface {
+   GetExperiments() (map[string]Description, serror)
+}
+	\end{lstlisting}
+\end{center}
+
+\begin{remark}
+	Metoda \textit{GetExperiements} trebuie să fie \textbf{thread-safe}\footnote{Să poată fi accesată simultan de mai multe thread-uri}, deoarece natura concurentă a serviciului obligă la apeluri concurente.
+\end{remark}
+
+În cazul în care nu a putut fi obținută lista experimentelor active, este necesar ca metoda să întoarcă o eroare, pentru a semnala componentei centrale \textit{Experimento} acest lucru. Ea va prelua apoi responsabilitatea gestionării erorii.
+
+\subsubsection{Store}
+
+Cum microserviciul \textit{Store} este responsabil pentru a reține asignarea unei entități către un experiment, vom expune două metode ale interfeței, una pentru a seta alegerea inițiala și alta pentru a interoga existența unei astfel de alegeri. Acestea vor trebui să primească ca parametru identificatorul entintății, și identificatorul experimentului, iar cea de \textit{set}, pe lângă acestea va primi ca parametru și grupul unde a fost asignată entitatea.
+
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+type Store interface {
+   SetExperimentGroup(entityID, expID, group string) error
+   GetExperimentGroup(entityID, expID string) (string, error)
+}
+	\end{lstlisting}
+\end{center}
+
+\subsubsection{Assigner}
+
+Microserviciul \textit{Assigner} este foarte important, deoarece diferite implementări ale acestuia vor rezulta în diferite comportamente ale sistemului de experimentare. Vom folosi o singură metodă în această interfață ce va primi ca parametrii identificatorul entității, iar mai apoi întreaga descriere a unui experiment. Metoda va returna un șir de caractere ce va corespunde id-ului unui grup din cadrul experimentului, acest fiind grupul către care entitatea va fi asignată.
+
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+type Assigner interface {
+  AssignGroup(entityID string, d Description) (string, error)
+}
+	\end{lstlisting}
+\end{center}
+
+\begin{remark}
+	Metoda \textbf{AssignGroup} nu trebuie să fie determinstă.
+\end{remark}
+
+\begin{remark}
+	Metoda \textbf{AssignGroup} trebuie să fie thread-safe.
+\end{remark}
+
+\subsubsection{Experimento}
+
+Deși serviciul \textit{Experimento}, după cum am precizat anterior, nu va fi implementat prin intermediul unei interfețe, vom descrie interogările pe care un client le poate face către acest serviciu, fie printr-un mecanism de tip \textit{REST} sau \textit{RPC}, cu ajutorul următorei signaturi:
+
+\begin{center}
+	\begin{lstlisting}[language=Golang]
+func GetAllVariables(entityID string) (Variables, error)
+	\end{lstlisting}
+\end{center}
+
+După cum se poate observa, vom expune posibilitatea de a interoga variabilele tuturor experimentelor din care face parte un utilizator. Motivul pentru care impunem această restricție, și nu oferim posibilitatea interogării variabilelor pentru un experiment punctual, este aceea de a forța clientul să implementeze un mecanism de \textit{caching}, tocmai pentru a reduce încărcarea asupra serviciului de experimentare.
+
+\begin{remark}
+	Este responsabilitatea clientului să determine valoarea de timp după care va invalida rezultatele variabilelor.
+\end{remark}
+
+\subsection{Îmbunătățirea performanțelor}
+
+După cum am văzut, arhitectura serviciul este făcută de o natură ce facilitează scalarea sistemului pe orizontală. Putem însă îmbunătăți  performanța serviciul, printr-un mecanism eficient de gestionare a resurselor. Acest lucru se poate obține fie prin introducerea paralelismului în sistem, fie prin introducerea concurenței în sistem. 
+
+Sistemele bazate pe o arhitectură cu microservicii, au o natură concurentă, cauzată de multiplele comunicări ce trebuie efectuate între servicii. Acest fapt, coraborat cu natura dinamică a unui serviciu de experimentare, ce presupune operații de gestionare a experimentelor, executate simultan cu operații de interogare a variabilelor ne indică mecanismul pe care îl putem utiliza. De aceea vom introduce \textbf{concurența} în serviciul pe care îl vom dezvolta. Mecanismul de concurență pe care îl vom folosi este acela implementat de limbajul de programare \textit{Go}, și este inspirat de către lucrarea \textit{Communicating Sequential Processing}\cite{hoare_csp}. De aceea, algoritmii pentru un microserviciu vor folosi mecanisme precum \textit{canale} pentru a implementa concurența.
+
+\subsection{Sistemul final}
+
+Pentru a exemplifca modul în care funcționează întreg sistemul de experimentare, dar șî pentru a ilustra cum comunică componentele vom reprezenta grafic procesul ce are loc atunci când serviciul este interogat. Menționăm faptul că alte facilități pe care sistemul le va implementa, precum adăugarea și eliminarea de servicii sunt triviale, și de aceea ne vom concentra atenția asupra acestui aspect. 
