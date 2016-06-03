@@ -2,16 +2,27 @@
 
 Aplicațiile moderne se confruntă foarte des cu probleme ce nu au o soluție optimă universală, precum retenția și creșterea numărului de utilizatori activi, sau maximizarea unui anumit număr de acțiuni efectuate de către aceștia. Aceste valori sunt de cele mai multe ori vitale pentru aplicație, și astfel, atunci când este efectuată o modificare asupra produsului, este necesară cuantificarea efectelor acesteia asupra diferitelor metrici. 
 
-Viteza cu care o companie iterează asupra produsului său este foarte importantă în contextul unui spațiu competitiv al produselor software. De aceea, în mod natural, s-a ridicat nevoia de a experimenta cu diferite soluții, în mod simultan, și cuantificarea efectelor acestora. Pentru a facilita efectuarea acestor experimente, și pentru a evalua efectele folosind diferite teste statistice, au fost dezvoltate sisteme de experimentare. 
+Viteza cu care o companie iterează asupra produsului său este foarte importantă în contextul unui spațiu competitiv al produselor software. De aceea, în mod natural, s-a ridicat nevoia de a experimenta cu diferite soluții, în mod simultan, și de a cuantifica efectele acestora. Pentru a facilita efectuarea acestor experimente, și pentru a compara rezultatele acestora folosind diferite teste statistice, au fost dezvoltate \textit{sisteme de experimentare. }
 
+\section{Scopul lucrării}
+
+Scopul lucrării este acela de a cerceta conceptele teoretice necesare pentru construirea unui serviciu de experimentare, performant și robust, urmată de implementarea efectivă a unei astfel de sistem, pentru a demonstra fezabilitatea și utilitatea ideilor. Deoarece vom pleca de la presupunerea că un astfel de mecanism reprezintă o componentă vitală a unei aplicații moderne, acesta va trebui să fie ușor scalabilă, și să ofere o disponibilitate ridicată. Din aceste motive este imperativă rularea într-un distribuită, și astfel strategiile vor fi alese pentru a se plia unui astfel de mediu.
+
+Un alt aspect pe care lucrarea dorește să îl trateze este acela de cerecetare a metodelor de asignare a experimentelor către o entitate, astfel încât să obținem rezultate semnificative din punct de vedere statistic cât mai rapid, dar în același timp să minizăm sau maximizăm posibilele efecte negative, respectiv pozitive, ale experimentelor asupra metricelor de bază. 
+
+\begin{remark}
+	O entitate va fi identificată în mod unic cu ajutorul unui identificator, ce va reprezentat sub forma unui șir de caractere.
+\end{remark}
+
+\textbf{Elementele de inovație} pe care lucrarea le propune fac referire la identificarea corectă și abstractizarea părților componente ale sistemului, astfel încât acestea să faciliteze construcția unui sistem modular cu proprietățile enumerate anterior. De asemenea, dorim să oferim o soluție optimă pentru asignarea experimentelor, astfel încât să obținem un compromis optim între ușurința de implementare, flexibilitatea și  performanța acesteia.
 
 \section{Structura lucrării}
 
 Lucrarea va fi împartită în 5 părți principale în care vom explora diverse strategii și abordări, pentru a ne atinge scopul descris anterior. 
 
-Prima parte constă în familiarizarea cititorului cu problema pe care dorim să o rezolvăm, ilustrând aspectele principale pe care un sistem de experimentare trebuie să le îndeplinească, dar și motivația lucrării. Vom examina în același timp contextul actual, analizând soluțiile existente, alături de avantajele și dezavantajele pe care fiecare dintre acestea le prezintă.
+Prima parte constă în familiarizarea cititorului cu problema pe care dorim să o rezolvăm, ilustrând caracteristicile principale pe care un serviciu de experimentare trebuie să le îndeplinească, dar și motivația lucrării. Vom examina în același timp contextul actual, analizând soluțiile existente, alături de avantajele și dezavantajele pe care fiecare dintre acestea le prezintă.
 
-În cea de-a doua parte a lucrării vom expune conceptele teoretice pe care ne vom construi propria noastră soluție pentru problema tratată. Ne dorim astfel ca la finalul acestei părți să avem arhitectura completă a sistemului, pentru ca mai apoi să îl putem analiza, ilustrând proprietățile pe care le îndeplinește.
+În cea de-a doua parte a lucrării vom expune conceptele teoretice pe care ne vom construi propria noastră soluție pentru problema tratată. Ne dorim astfel ca la finalul acestei părți să avem arhitectura completă a sistemului, pentru ca apoi să o putem analiza, ilustrând proprietățile pe care le îndeplinește.
 
 În cea de-a treia parte ne vom concentra atenția asupra modurilor de asignare a experimentelor. Vor fi definite o serie de metrice pe care le vom urmări, așa încât să putem efectua comparații robuste între metodele alese. Pe lângă acestea, vom examina în mod practic performanța fiecăreia dintre aceste abordări, pentru acest lucru fiind necesară definirea riguroasă a unei metodologii de testare.
 
@@ -19,23 +30,15 @@ A patra parte a lucrării va consta în aplicarea tuturor ideilor și conceptelo
 
 În final vom evidenția elementele de inovație prezentate pe parcursul acestei lucrări și vom indica posibilele direcții de continuare a studuiului acestei probleme. Vor fi prezentate de asemenea concluziile obținute pe parcursul cerecetării prezentate de lucrare.
 
-\section{Scopul lucrării}
-
-Scopul lucrării este acela de a cerceta conceptele teoretice necesare pentru construirea unui sistem de experimentare performant și robust, urmate de implementarea efectivă a unei astfel de serviciu, pentru a demonstra fezabilitatea acestora. Deoarece vom pleca de la presupunerea că un astfel de sistem reprezintă o componentă vitală a unei aplicații moderne, acesta va trebui să fie ușor scalabilă, și să ofere o disponibilitate ridicată. Din aceste motive este imperativă rularea într-un mediu distribuit.
-
-Un alt aspect pe care lucrarea dorește să îl trateze este acela de cerecetare a metodelor de asignare a experimentelor către o entitate, astfel încât să obținem rezultate semnificative din punct de vedere statistic cât mai rapid, dar în același timp să minizăm sau maximizăm posibilele efecte negative, respectiv pozitive, ale experimentelor asupra metricelor de bază. 
-
-\textbf{Elementele de inovație} pe care lucrarea le propune fac referire la identificarea corectă și abstractizarea părților componente ale sistemului, astfel încât acestea să faciliteze construcția unui sistem modular cu proprietățile enumerate anterior. De asemenea, dorim să oferim o soluție optimă pentru asignarea experimentelor, astfel încât să obținem un compromis optim între ușurința de implementare, flexibilitatea și  performanța acesteia.
-
 \section{Contextul actual}
 
-La momentul scrierii lucrării, majoritatea companiilor mari de informatică, și în special cele ce au produse \textit{web}, folosesc un astfel de sistem de experimentare precum cel descris anterior. De asemenea,  există un număr semnificativ de lucrări în literatură ce tratează problema descrisă \cite{overlapgoogle} \cite{multiarmeconomy}, ilustrând concepte ce pot fi folosite în construirea unui astfel de sistem. 
+La momentul scrierii lucrării, majoritatea companiilor mari de informatică, și în special cele ce au produse \textit{web}, folosesc sisteme de experimentare precum cel descris anterior. De asemenea,  există un număr semnificativ de lucrări în literatură ce tratează problema descrisă \cite{overlapgoogle} \cite{multiarmeconomy}, ilustrând concepte ce pot fi folosite în construirea unui astfel de sistem. 
 
-Cu toate acestea, din cauza faptului ca ele au în cea mai mare parte de companii precum Google, Microsoft, Amazon, etc., nu au fost expuse implementari \textit{open-source} ale acestora. Astfel, o mare parte din detaliile referitoare la modul de funcționare al acestor produse ramâne în continuare necunoscută. Din aceasta cauza, lucrarea a întâmpinat un inconvenient major în analiza pe care urmeaza sa o efectueze asupra acestor servicii, deoarece vom fi nevoiți să analizam doar conceptele în jurul carora au fost dezvoltate serviciile si ne vom gasi în incapacitatea de a testa în mod practic aceste soluții.
+Cu toate acestea, din cauza faptului ca ele au fost dezvoltate în cea mai mare parte de companii precum Google, Microsoft, Amazon, etc., nu au fost expuse implementari \textit{open-source} ale acestora. O mare parte din detaliile referitoare la modul de funcționare al acestor produse ramâne în continuare necunoscută. Lucrarea a întâmpinat un inconvenient major în analiza pe care urmează să o efectueze, deoarece vom fi nevoiți să analizam doar conceptele în jurul cărora au fost dezvoltate soluțiile menționate si ne vom gasi în incapacitatea de a le testa în mod practic.
 
 \subsection{Soluții existente}
 
-După cum am menționat anterior, majoritatea companiilor ce folosesc un sistem de experimentare, nu au expus o versiune \textit{open-source} a acestuia. Din acest motiv, numărul de soluții disponibile este relativ limitat. În continuare, le vom examina pe cele mai uzitate dintre acestea, punctând conceptele cheie ale acestora.
+După cum am menționat anterior, majoritatea companiilor ce folosesc un sistem de experimentare, nu au expus o versiune \textit{open-source} a acestuia. Din acest motiv, numărul de soluții disponibile este relativ limitat. În continuare, le vom examina pe cele mai uzitate dintre acestea, punctând conceptele cheie.
 
 \textit{\textbf{PlanOut}} este una din abordările care se bucură de cea mai mare popularitate, aceasta constând intr-un framework de experimente, dezvoltat de către compania \textit{Facebook}. \textit{PlanOut} se concentrează însă asupra modului de definire a experimentelor. De altfel, scopul principal al acestui framework este acela de a decupla definirea și gestionarea experimentelor de codul aplicației, și a oferi un mod standardizat de gestionare a parametrilor. 
 
