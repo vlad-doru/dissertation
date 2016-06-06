@@ -1,62 +1,83 @@
 \chapter{Introducere}
 
-Aplicațiile moderne se confruntă foarte des cu probleme ce nu au o soluție optimă universală, precum retenția și creșterea numărului de utilizatori activi, sau maximizarea unui anumit număr de acțiuni efectuate de către aceștia. Aceste valori sunt de cele mai multe ori vitale pentru aplicație, și astfel, atunci când este efectuată o modificare asupra produsului, este necesară cuantificarea efectelor acesteia asupra diferitelor metrici. 
+Aplicațiile moderne se confruntă foarte des cu probleme ce nu au o soluție optimă universală, precum retenția și creșterea numărului de utilizatori activi, sau maximizarea unui anumit număr de acțiuni efectuate de către aceștia. Aceste valori sunt de cele mai multe ori vitale pentru aplicație, și astfel, atunci când este efectuată o modificare asupra produsului, este necesară cuantificarea tuturor efectelor asupra acestora.
 
-Viteza cu care o companie iterează asupra produsului său este foarte importantă în contextul unui spațiu competitiv al produselor software. De aceea, în mod natural, s-a ridicat nevoia de a experimenta cu diferite soluții, în mod simultan, și de a cuantifica efectele acestora. Pentru a facilita efectuarea acestor experimente, și pentru a compara rezultatele acestora folosind diferite teste statistice, au fost dezvoltate \textit{sisteme de experimentare. }
+Viteza cu care o companie iterează asupra produsului său este foarte importantă în contextul unui spațiu competitiv al produselor software. De aceea, în mod natural, s-a ridicat nevoia de a experimenta cu diferite soluții, în mod simultan, pentru a o determina pe cea mai eficientă. Pentru a facilita efectuarea acestor experimente, și pentru a compara rezultatele acestora folosind diferite teste statistice, au fost dezvoltate \textit{sisteme de experimentare. }
 
 \section{Scopul lucrării}
 
-Scopul lucrării este acela de a cerceta conceptele teoretice necesare pentru construirea unui serviciu de experimentare, performant și robust, urmată de implementarea efectivă a unei astfel de sistem, pentru a demonstra fezabilitatea și utilitatea ideilor. Deoarece vom pleca de la presupunerea că un astfel de mecanism reprezintă o componentă vitală a unei aplicații moderne, acesta va trebui să fie ușor scalabilă, și să ofere o disponibilitate ridicată. Din aceste motive este imperativă rularea într-un distribuită, și astfel strategiile vor fi alese pentru a se plia unui astfel de mediu.
+Scopul lucrării este acela de a cerceta conceptele teoretice necesare pentru construirea unui serviciu de experimentare, performant și robust, urmată de implementarea efectivă a unei astfel de sistem, pentru a demonstra fezabilitatea și utilitatea ideilor. Deoarece vom pleca de la presupunerea că un astfel de mecanism reprezintă o componentă vitală a unei aplicații moderne, acesta va trebui să fie ușor scalabil, și să ofere o disponibilitate ridicată. Din aceste motive este imperativă rularea distribuită, iar strategiile vor fi alese pentru a se plia unui astfel de mediu.
 
-Un alt aspect pe care lucrarea dorește să îl trateze este acela de cerecetare a metodelor de asignare a experimentelor către o entitate, astfel încât să obținem rezultate semnificative din punct de vedere statistic cât mai rapid, dar în același timp să minizăm sau maximizăm posibilele efecte negative, respectiv pozitive, ale experimentelor asupra metricelor de bază. 
+Un alt aspect pe care lucrarea dorește să îl trateze este acela de cerecetare a modului de determinare ale grupurilor, astfel încât să obținem rezultate semnificative din punct de vedere statistic cât mai rapid, dar în același timp să minizăm sau maximizăm posibilele efecte negative, respectiv pozitive, ale experimentelor asupra metricelor de bază. 
+
+\textbf{Elementele de inovație} pe care lucrarea le propune fac referire la identificarea corectă și abstractizarea părților componente ale sistemului, astfel încât acestea să faciliteze construcția unui sistem modular cu proprietățile enumerate anterior. De asemenea, dorim să oferim o soluție optimă pentru determinarea grupurilor, astfel încât să obținem un compromis între ușurința de implementare, flexibilitatea și performanța acesteia.
+
+\section{Preliminarii}
+
+Pentru a putea fi coerenți pe parcursul acestei lucrări va trebui să oferim o definiție inițială a unor concepte pe care le vom întâlni pe întreg parcursul lucrării.
+
+\begin{definition}
+	\label{def_entity}
+	Vom denumi o \textbf{entitate}, reprezentarea unui obiect, ce se va identifica în mod unic cu ajutorul unui \textit{identificator} de tip șir de caractere, ce mai poartă numele și de \textit{\textbf{id}}.
+\end{definition}
+
+\begin{definition}
+	Vom defini o \textbf{variabilă} a unui experiment, o componentă mobilă a acestuia, identificată unic prin nume, ce poate lua un număr finit de valori.
+\end{definition}
+
+\begin{definition}
+	Prin \textbf{efectul de sezonalitate}, vom înțelege variația unui experiment cauzată de ziua săptămânii în care acesta se desfășoară.
+\end{definition}
 
 \begin{remark}
-	O entitate va fi identificată în mod unic cu ajutorul unui identificator, ce va reprezentat sub forma unui șir de caractere.
+	Pentru a se limita efectul de sezonalitate, se recomandă efectuarea experimentelor pe durate de timp mai mari de o săptămână, sau în cazul în care experimentul este unul sensibil, mai mari de o lună.
 \end{remark}
 
-\textbf{Elementele de inovație} pe care lucrarea le propune fac referire la identificarea corectă și abstractizarea părților componente ale sistemului, astfel încât acestea să faciliteze construcția unui sistem modular cu proprietățile enumerate anterior. De asemenea, dorim să oferim o soluție optimă pentru asignarea experimentelor, astfel încât să obținem un compromis optim între ușurința de implementare, flexibilitatea și  performanța acesteia.
+\begin{definition}
+	Un \textbf{test statistic} constă în obținerea unei deducții, bazate pe o selecție din populătie, prin testarea unei anumite ipoteze statistice.
+\end{definition}
 
 \section{Structura lucrării}
 
-Lucrarea va fi împartită în 5 părți principale în care vom explora diverse strategii și abordări, pentru a ne atinge scopul descris anterior. 
+Lucrarea va fi împartită în 5 părți principale în care vom explora diverse idei și concepte, pentru a ne atinge scopul descris anterior. 
 
-Prima parte constă în familiarizarea cititorului cu problema pe care dorim să o rezolvăm, ilustrând caracteristicile principale pe care un serviciu de experimentare trebuie să le îndeplinească, dar și motivația lucrării. Vom examina în același timp contextul actual, analizând soluțiile existente, alături de avantajele și dezavantajele pe care fiecare dintre acestea le prezintă.
+Prima parte constă în \textit{familiarizarea} cititorului cu problema pe care dorim să o rezolvăm, ilustrând caracteristicile principale pe care un serviciu de experimentare trebuie să le îndeplinească, dar și motivația lucrării. Vom examina în același timp contextul actual, soluțiile existente, alături de avantajele și dezavantajele pe care fiecare dintre acestea le prezintă.
 
-În cea de-a doua parte a lucrării vom expune conceptele teoretice pe care ne vom construi propria noastră soluție pentru problema tratată. Ne dorim astfel ca la finalul acestei părți să avem arhitectura completă a sistemului, pentru ca apoi să o putem analiza, ilustrând proprietățile pe care le îndeplinește.
+În cea de-a doua parte a lucrării vom expune conceptele teoretice pe care ne vom construi propria noastră soluție pentru problema tratată. Ne dorim astfel ca la finalul acestei părți să avem \textit{arhitectura} completă a sistemului, pentru ca apoi să o putem analiza, ilustrând proprietățile pe care le îndeplinește.
 
-În cea de-a treia parte ne vom concentra atenția asupra modurilor de asignare a experimentelor. Vor fi definite o serie de metrice pe care le vom urmări, așa încât să putem efectua comparații robuste între metodele alese. Pe lângă acestea, vom examina în mod practic performanța fiecăreia dintre aceste abordări, pentru acest lucru fiind necesară definirea riguroasă a unei metodologii de testare.
+În cea de-a treia parte ne vom concentra atenția asupra modurilor de construcție a grupurilor unui experiment. Vor fi definite o serie de metrice pe care le vom urmări, așa încât să putem efectua comparații robuste între strategiile alese. Pe lângă acestea, vom examina în mod practic performanța fiecărei abordări, pentru acest lucru fiind necesară definirea unei metodologii de testare.
 
 A patra parte a lucrării va consta în aplicarea tuturor ideilor și conceptelor teoretice descrise pe parcusul lucrării, urmând astfel să construim un serviciu de experimentare. Vom descrie aspectele practice, referitoare la implementarea serviciului, alături de performanțele acestuia.
 
-În final vom evidenția elementele de inovație prezentate pe parcursul acestei lucrări și vom indica posibilele direcții de continuare a studuiului acestei probleme. Vor fi prezentate de asemenea concluziile obținute pe parcursul cerecetării prezentate de lucrare.
+În final vom evidenția elementele de inovație prezentate pe parcursul acestei lucrări și vom indica posibilele direcții de continuare a studuiului acestei probleme. Vor fi prezentate concluziile obținute pe parcursul cerecetării prezentate de lucrare.
 
 \section{Contextul actual}
 
-La momentul scrierii lucrării, majoritatea companiilor mari de informatică, și în special cele ce au produse \textit{web}, folosesc sisteme de experimentare precum cel descris anterior. De asemenea,  există un număr semnificativ de lucrări în literatură ce tratează problema descrisă \cite{overlapgoogle} \cite{multiarmeconomy}, ilustrând concepte ce pot fi folosite în construirea unui astfel de sistem. 
+La momentul scrierii lucrării, majoritatea companiilor mari de informatică, și în special cele ce au produse \textit{software}, folosesc sisteme de experimentare precum cel descris anterior. De asemenea, există un număr semnificativ de lucrări în literatură ce tratează problema descrisă \cite{overlapgoogle} \cite{multiarmeconomy}, ilustrând concepte ce pot fi folosite în construcția unui astfel de sistem. 
 
-Cu toate acestea, din cauza faptului ca ele au fost dezvoltate în cea mai mare parte de companii precum Google, Microsoft, Amazon, etc., nu au fost expuse implementari \textit{open-source} ale acestora. O mare parte din detaliile referitoare la modul de funcționare al acestor produse ramâne în continuare necunoscută. Lucrarea a întâmpinat un inconvenient major în analiza pe care urmează să o efectueze, deoarece vom fi nevoiți să analizam doar conceptele în jurul cărora au fost dezvoltate soluțiile menționate si ne vom gasi în incapacitatea de a le testa în mod practic.
+Cu toate acestea, din cauza faptului că au fost dezvoltate în cea mai mare parte de companii precum Google, Microsoft, Amazon, etc., nu au fost expuse implementări \textit{open-source} ale acestora. O mare parte din detaliile referitoare la modul de funcționare al acestor produse ramâne în continuare necunoscută. Lucrarea a întâmpinat un inconvenient major în analiza pe care urmează să o efectueze, deoarece vom fi nevoiți să analizăm doar conceptele în jurul cărora au fost dezvoltate soluțiile menționate si ne vom găsi în incapacitatea de a le testa în mod practic.
 
 \subsection{Soluții existente}
 
-După cum am menționat anterior, majoritatea companiilor ce folosesc un sistem de experimentare, nu au expus o versiune \textit{open-source} a acestuia. Din acest motiv, numărul de soluții disponibile este relativ limitat. În continuare, le vom examina pe cele mai uzitate dintre acestea, punctând conceptele cheie.
+După cum am menționat anterior, numărul de sisteme de experimentare ce pot fi folosite ca soluții este relativ limitat. În continuare, le vom examina pe cele mai uzitate dintre acestea, punctând conceptele cheie.
 
-\textit{\textbf{PlanOut}} este una din abordările care se bucură de cea mai mare popularitate, aceasta constând intr-un framework de experimente, dezvoltat de către compania \textit{Facebook}. \textit{PlanOut} se concentrează însă asupra modului de definire a experimentelor. De altfel, scopul principal al acestui framework este acela de a decupla definirea și gestionarea experimentelor de codul aplicației, și a oferi un mod standardizat de gestionare a parametrilor. 
+\textit{\textbf{PlanOut}} este una din abordările care se bucură de cea mai mare popularitate, aceasta constând intr-un framework de experimente, \textit{open-source}, dezvoltat de către compania \textit{Facebook}. \textit{PlanOut} se concentrează însă asupra modului de definire a experimentelor mai mult și nu pe rularea efectivă a acestora. De altfel, scopul principal framework-ului este acela de a decupla definirea și gestionarea experimentelor de codul aplicației, și a oferi un mod standardizat de gestionare a parametrilor. 
 
-\textit{PlanOut} insistă pe standardizarea modului de definire a experimentelor, și asupra gestiunii variabilelor dintr-un experiment. Alegerea parameterilor se efectueză prin intermediul unor operatorii predefiniți, precum \textit{UniformChoice}, \textit{WeightedChoice}, iar mai apoi, modul de alegere al acestora este standardizat, folosind segmente de utilizator și funcția de disperisie \textit{SHA-1}  \cite{planout}. Putem observa că deși framework-ul este destul de flexibil, acesta nu este extensibil și limitează posibilitatea de a utiliza diferite abordări statistice pentru gestionarea efectelor experimentelor. Acest dezavantaj este unul major, după cum vom vedea, iar lucrarea curentă va propune o soluție pentru această problemă. 
+\textit{PlanOut} insistă pe standardizarea modului de definire a peisajului experimental, și asupra gestiunii variabilelor. Alegerea parameterilor se efectueză prin intermediul unor operatorii predefiniți, precum \textit{UniformChoice}, \textit{WeightedChoice}, iar mai apoi, modul de alegere al acestora este standardizat, folosind segmente de utilizator și funcția de disperisie \textit{SHA-1}  \cite{planout}. Putem observa că deși framework-ul este destul de flexibil, acesta nu este extensibil și limitează posibilitatea de a utiliza diferite abordări statistice pentru gestionarea efectelor experimentelor. Acest dezavantaj este unul major, după cum vom vedea, iar lucrarea curentă va propune o soluție pentru această problemă. 
 
-Pe lângă acestea, considerăm că definirea unui experiment prin intermediul modului de alegere a parameterilor acestora, deși robust, nu exprimă destul de clar definirea fiecărui grup. Vom propune un mod alternativ de definire a experimentelor, ce nu va fi concentrat pe definirea parametrilor, ci pe definirea grupurilor. 
+Pe lângă acestea, considerăm că definirea unui experiment prin intermediul modului de alegere a parameterilor acestora, deși robust, nu exprimă destul de clar definiția fiecărui grup. Vom propune un mod alternativ de descriere a experimentelor, ce nu va fi concentrat pe definirea parametrilor, ci pe cea a grupurilor. 
 
-Putem concluziona că acest framework nu are același scop precum produsul pe care lucrarea îl propune, fiind ortogonal cu acestea. Diferența principală pe care o putem observa constă în lipsa unui serviciu \textit{end-to-end}\footnote{Un serviciu care conține toate componetele necesare rulării acestuia} de gestionare a experimentelor.
+Putem concluziona că acest framework nu are același scop precum produsul pe care lucrarea îl propune, fiind \textit{ortogonal} cu acestea. Diferența principală pe care o putem observa constă în lipsa unui serviciu \textit{end-to-end}\footnote{Un serviciu care conține toate componetele necesare rulării acestuia} de gestionare a experimentelor.
 
-\textbf{\textit{Gertrude}} reprezintă un framework de experimente, care oferea posibilitatea de a defini experimentele într-un fișier de configurare și apoi urma să asigneze unei entități un anumit grup. În primul rând, acest framework nu mai este dezvoltat activ, compania \textit{Cloudera} care era dezvoltatoarea acestui proiect anunțând ca proiectul nu va mai fi menținut. Pe lângă acest aspect care descalifică proiectul ca o alternativă fezabilă, deoarece experimentele sunt definite într-un fișier de configurare, viteza de iterație și de \textit{deployment} va fi încetinită. 
+\textbf{\textit{Gertrude}} este un framework de experimente, care oferea posibilitatea de a defini experimentele într-un fișier de configurare și apoi urma să asigneze unei entități un anumit grup. În primul rând, acest framework \textit{nu mai este dezvoltat activ}, și nici nu se oferă mentenanță pentru acesta. Compania \textit{Cloudera} care era dezvoltatoarea acestui proiect a anunțat ca proiectul nu va mai fi menținut. Pe lângă acest aspect care descalifică proiectul ca o alternativă fezabilă, experimentele sunt definite într-un fișier de configurare, iar astfel viteza de iterație și de \textit{deployment} va fi încetinită. 
 
-Pe lângă soluțiile menționate există alte câteva alternative, precum \textit{Vanity}, însă acestea nu se bucură de o popularitate foarte mare, și de multe ori nu sunt \textit{language-agnostic}\footnote{Funcționează indiferent de limbajul în care este scrisă aplicația}. Există și alte dezavatanje precum lipsa extensibilității și a flexibilității.
+Pe lângă soluțiile menționate există alte câteva alternative, precum \textit{Vanity}, însă acestea nu se bucură de o popularitate foarte mare, și de multe ori nu sunt \textit{language-agnostic}\footnote{Funcționează indiferent de limbajul în care este scrisă aplicația}. Există și alte dezavatanje precum lipsa extensibilității și a flexibilității acestora.
 
 \section{Motivație}
 
-După ce am examinat contextul actual al sistemelor de experimentare, este natural sa oferim motivele ce au condus la elaborarea lucrării. Am precizat anterior, în mod sumar, o parte din motivația ce stă în spatele dezvoltării unui astfel de sistem. Vom dezvolta și articula ideile inițiale, pentru a putea oferi cititorului o viziune mai largă asupra capacităților unui astfel de produs.
+După ce am examinat contextul actual al sistemelor de experimentare, este natural să oferim motivele ce au condus la elaborarea lucrării. Am precizat anterior, în mod sumar, o parte din motivația \textit{practică} ce stă în spatele dezvoltării unui astfel de sistem. Vom articula ideile inițiale, pentru a putea oferi cititorului o viziune mai largă asupra capacităților unui astfel de produs.
 
-Aplicațiile moderne sunt scrise de cele mai multe ori în mai multe limbaje, pentru a putea funcționa pe o gamă largă de platforme. De exemplu, putem avea o aplicație care are backend-ul scris în \textit{Go} sau \textit{Python}, și clienții de frontend scriși în \textit{Swift}, \textit{Java} și \textit{JavaScript}. Deoarece nevoia de experimentare este prezentă în fiecare din aceste componente, dorim ca produsul nostru să fie un serviciu \textit{end-to-end} care să poată fi folosit de către orice aplicație. 
+Aplicațiile moderne sunt scrise de cele mai multe ori în mai multe limbaje, pentru a putea funcționa pe o gamă largă de platforme, dar și pentru a oferi dezvoltatorului posibilitatea de a folosi mediul potrivit unei anumite sarcini. De exemplu, putem avea o aplicație care are backend-ul scris în \textit{Go} sau \textit{Python}, și clienții de frontend scriși în \textit{Swift}, \textit{Java} pentru \textit{iOS}, respectiv \textit{Android}, dar și \textit{JavaScript} pentru aplicațiile \textit{web}. Deoarece nevoia de experimentare este prezentă în fiecare din aceste componente, dorim ca produsul nostru să fie un serviciu \textit{end-to-end} care să poată fi folosit de către orice aplicație. 
 
 Vom dori de asemenea ca serviciul să ofere posibilitatea utilizatorului de a extinde capacitățile acestuia. După cum am vazut, alternativele existente au o viziune părtinitoare asupra modului de definire a experimentelor și de gestionare a parameterilor acestora. Ne propunem ca sistemul de experimentare pe care lucrarea îl va descrie să nu facă nicio presupunere referitoare la modul de alegere a parameterilor, și să ofere astfel utilizatorilor sistemului flexibilitatea de a-i gestiona pe aceștia într-o manieră proprie. Pe lângă acestea, vom folosi cercetarea referitoare la abordările statistice existente pentru a oferi o implementare completă \textit{out-of-the-box} cât mai eficientă.
 
