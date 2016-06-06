@@ -1,1 +1,198 @@
 \chapter{Metode de experimentare}
+
+După ce am prezentat toate componentele unui sistem de experimentare, am observat faptul că singura componentă ce influențează distribuția entităților în cadrul unui experiment, dar și efectele pe care le au experimentele, este aceea de \textit{Assigner}. Prin intermediul funcției \textit{AssignGroup}, ce primește ca parameterii identificatorul unei entități și decrierea completă a unui experiment, vom returna identificatorul grupului din care va face parte entitatea. 
+
+Vom studia inițial modul în care vom determina diferențele între două grupur, urmând ca mai apoi să prezentăm câteva metode de testare, ilustrând metodologia, și modul de evaluare al acestora, pentru ca mai apoi să oferim o alternativă general valabilă.
+
+\section{Analiza experimentelor}
+
+Scopul final al unui sistem de experimentare este acela de a obține o viziune de ansamblu asupra diferitelor abordări posibile, pentru a putea mai apoi decide care dintre acestea sunt cele mai profitabile pentru produsul respectiv. De aceea, un aspect vital este acela de a cuantifica aceste diferențe. Vom considera ca o convenție că vor exista mai multe grupuri, și dorim să aflăm care este cel mai profitabil, prin prisma mediei unei metrice. De asemenea, vom considera că va exista întotdeauna un grup de control, ce va cuantifica starea \textit{de facto} a metricei, în stadiul curent al aplicației. Vom calcula astfel diferența între fiecare grup experimental și cel de control în ceea ce privește media metricei alese.
+
+Vom da un exemplu pentru a putea înțelege mai bine abordarea pe care o avem. Presupunem că avem un produs de comerț online, și există 3 grupuri: \textit{control}, \textit{test1} și \textit{test2}, iar metrica ce ne interesează este rata conversiilor în aplicația respectivă. Vom compara media ratei conversiilor pentru grupurile \textit{test1} și \textit{test2} cu media ratei conversiilor pentru grupul de control.
+
+\begin{remark}
+	Media unei metrici pentru o populație este distribuită normal, de medie ${\mu}$ și deviație standard $\frac{\sigma}{\sqrt{n}}$, unde $n$ reprezintă numărul observațiilor, conform \textbf{teoremei limită centrală}.
+\end{remark}
+
+Prin convenție, în această secțiune ne vom referi doar la două grupuri, \textit{control} și \textit{test}, fără pierderea generalității, deoarece modul de comparare rămâne universal valabil.
+
+\subsubsection{Notații}
+
+Vom nota cu  $\mu_{control}$ și $\mu_{test}$, media metricei pentru \textit{\textbf{populația}} grupului de control, respectiv de test. În mod analog, vom nota cu $\sigma_{control}$ și $\sigma_{test}$, deviația standard a metricei pentru \textit{\textbf{populația}} grupurilor. Pentru a nota media \textbf{observațiilor} metricei pentru cele două grupuri vom folosi simbolurile $\overline{X}_{control}$, respectiv $\overline{X}_{test}$. Nu în ultimul rând vom nota cu $N_{control}$ și $N_{test}$ numărul de observații din grupul de control, respectiv test.
+
+\subsubsection{Testul Welsch \textit{t}}
+
+Pentru efectuarea comparației vom calcula intervalul de încredere pentru diferentă între $\mu_{control}$ șî $\mu_{test}$. Pentru acest lucru vom folosi testul statistic \textit{Welsch} \cite{Welch1947}. Testul \textit{Welch} este un test pentru două eșantioane, folosit pentru a testa ipoteza că aceastea au aceeași metrică. 
+
+Testul \textit{Welch t}, este o adaptare a testului \textit{Student t}, acesta având la bază testul Student. Acesta este însă mult mai robust când cele două eșantioane au deviații standard diferite, dar și dimensiuni diferite. Acest tip de teste se efectuează de obicei în practică atunci cănd cele două eșantioane nu se suprapun, și astfel se pretează excelent pentru a fi folosit de către un sistem de experimentare. 
+
+Vom descrie modul de calcul al testului, dar și cum putem calcula intervalul de încredere pentru diferența dintre media metricei între grupul de test și grupul de control.
+
+Pentru a efectua testul statistic \textit{Welsch}, va trebui să calculăm statistica \textit{t}, astfel:
+
+\begin{equation}
+\label{tstatistic}
+	t = \frac{\overline{X}_{test} - \overline{X}_{conrol}}{
+		\sqrt{ {\frac{\sigma_{test}^2}{N_{test}} }+ {\frac{\sigma_{control}^2}{N_{control}}}}
+		}
+\end{equation}
+
+\vspace{0.8cm}
+
+Pentru a determina gradele de libertate vom folosi o ecuație pentru aproximarea acestora, ce poartă numele de ecuația \textit{Welch–Satterthwaite}. Astfel, $\nu$ se aproximează astfel:
+
+\begin{equation}
+\label{vapprox}
+\nu = \frac{({\frac{\sigma_{test}^2}{N_{test}} }+ {\frac{\sigma_{control}^2}{N_{control}}}) ^ 2}{
+	\frac{\sigma_{test}^4}{N_{test}^2 \nu_{test}} + 
+	\frac{\sigma_{control}^4}{N_{control}^2 \nu_{control}}
+}
+\end{equation}
+
+\vspace{0.8cm}
+
+În ecuația \ref{vapprox} am notat cu $\nu_{test} = N_{test} - 1$, gradele de libertate asociate primei estimări a varianței,  și $\nu_{control} = N_{control} - 1$, gradele de libertate asociatei estimării varianței pentru grupul de control.
+
+O dată ce avem calculate statisticile $t$ și $\nu$, putem folosi distribuția \textit{t}, pentru a testa ipoteza nulă, conform căreia cele două medii ale populațiilor sunt egale, sau ipoteza alternativă că una din populații are media mai mare sau egală cu cealaltă, folosind un test cu coadă simplă, și de aici putem obține valoarea pentru \textit{p-value}, tocmai pentru a putea oferi utilizatorilor o interpretare mai ușoară a testelor. \cite{Welch1947}
+
+\begin{remark}
+	Aproximarea gradelor de libertate se face prin rotunjirea în jos a valorii obținute din relația \ref{vapprox}.
+\end{remark}
+
+Am descris astfel modul de comparare a mediilor unei metrice pentru două grupuri de testare diferite. Rămâne să expunem modul de calcul al intervalelor de încredere pentru diferența mediilor, pentru o precizie $\alpha \in (0, 1)$. Avem următoarea formulă de calcul: \cite{miao}
+
+\begin{equation}
+\overline{X}_{text} - \overline{X}_{control} \pm t_{1 - \alpha/2, \nu} \
+\sqrt{ {\frac{\sigma_{test}^2}{N_{test}} }+ {\frac{\sigma_{control}^2}{N_{control}}}}
+\end{equation}
+
+\vspace{0.8cm}
+
+Menționăm ca $\nu$ se calculează de asemenea cu formula Welch-Satterthwaite.
+
+Am expus astfel în această secțiune mecanismele statistice prin intermediul cărora vom compara o metrică pentru două grupuri. Prin convenție, datorită faptului că metoda descrisă are avantajele expuse, o vom utiliza implicit pe întreg parcursul lucrării.
+
+\section{Preliminarii}
+
+Având în vedere că în această secțiune vom prezenta mai multe moduri de experimentare, și implicit mai multe strategii, avem nevoie de instrumentele teoretice necesare pentru a cuantifica eficiența acestora.
+
+\begin{remark}
+	Problema minimizării unei metrice $M$, este echivalentă cu problema maximizării metricei $-M$.
+\end{remark}
+
+Astfel, vom considera prin convenție faptul că va trebui să maximizăm valoarea unei metrice.
+
+
+Presupunem că există $n$ grupuri în experimentul nostru, și dorim să maximizăm o metrică. Vom nota cu $\mu_1, \mu_2, ... \mu_n$ valorile medii ale metricei pe care o monitorizăm în cele $n$ grupuri. Vom nota cu $\mu^*$ valoarea media optimă a metricei. Se poate observa relația:
+
+\[
+\mu^* = \max_{i = \overline{1, n}}\{\mu_i\}
+\]
+
+Fie momentul $t$ ce va reprezenta asignarea a celei de-a $t$ entități către un grup. Vom nota cu $r_t$ valoarea metricei obținută prin asignarea efectuată. Putem să definim în mod formal regretul, pe care îl vom nota cu $\rho$, după ce am asignat $T$ entități.
+
+\begin{equation}
+\label{regret}
+\rho = T * \mu^* - \sum_{i = 1}^{T}{r_i}
+\end{equation}
+
+\vspace{0.8cm}
+
+\begin{definition}
+	O strategie se va numi optimă dacă $\rho$, regretul asociat, este 0 la oricare moment de timp $t$.
+\end{definition}
+
+\begin{definition}
+	O strategie se va numi strategie "zero-regret", dacă valoarea medie a regretului, $\overline{\rho}$ tinde către 0 cu probabilite 1, atunci când $t \to \infty$.
+\end{definition}
+
+\begin{remark}
+	O strategie de tipul "zero-regrest" va converge către o strategie optimă după un anumit număr de runde.
+\end{remark}
+
+În literatură au fost descrise un număr larg de diferite strategii de selecție ce au ca scop minimizarea regretului. Cu toate acestea, pentru un sistem de experimentare există o altă metrică care este foarte importantă. Presupunem că există două grupuri pentru care valoarea medie a metricei pentru populația acestora este $\mu_1 \neq \mu_2$.
+
+\begin{definition}
+	Vom nota cu $t_{\alpha}^*$ numărul de asignări după care am obținut rezultate semnificative din punct de vedere statistic, cu încredere $\alpha$, că mediile celor două grupuri sunt diferite. Vom denumi această metrică pe care lucrarea o propune, \textbf{timpul de convergență}.
+\end{definition}
+
+\section{Testare A/B}
+
+Există mai multe metode de experimentare, din care cea mai uzitată în industria informatică este aceea a testării \textit{A/B}, ea fiind folosită în mod constant de companii uriașe precum \textit{Google}, \textit{Facebook}, sau \textit{Amazon}. 
+
+\begin{definition}
+	\textbf{Testarea A/B} este o formă de testarea a ipotezelor statistice, ce implică existența a două grupuri, unul de control și unul de test, iar între acestea două diferă valoarea unei singure variabile.
+\end{definition}
+
+Testarea \textit{A/B} este una din cele mai răspândite metode de experimentare datorită simplității acesteia. Pentru a înțelge mai bine modul în care se folosește aceasta vom da un exemplu. Vom presupune că un magazin de comerț on-line dorește să determine care culoare este mai potrivită pentru butonul de finalizare comandă. Se creează astfel două grupuri de utilizatori, primul grup va observa un buton roșu, în timp ce al doilea grup va observa un buton verde. Apoi se adună date referitoare la media CTR\footnote{Click through rate}-ului fiecărui grup până când se va observa o diferența seminificativă din punct de vedere statistic. Astfel, se va alege culoarea butonului ce va permite obținerea unor rezultate mai bune. 
+
+\begin{remark}
+	Deși în mod istoric în contextul testării A/B avem două grupuri, putem extinde metoda pentru a testa mai mult de 2 valori ale unei singure variabile.
+\end{remark}
+
+Această abordare este folosită de multe ori pentru modificări incrementale, și astfel grupul de control nu va observa nicio modificare asupra produsului, în timp ce grupul de test va observa diferențele cauzate de o valoare diferită a unei variabile. Deși poate părea ca un concept foarte simplu, această metodă este foarte puternică. Pentru a putea obține rezultate semnificative din punct de vedere statistic cât mai repede, se recomanda ca metricele pe care dorim să le cuantificăm să fie în număr cât mai mic, la fel precum număr de variații ale variabilele alese pentru testare.
+
+\begin{remark}
+	Deși se pot obține rezultate semnificative foarte rapid, este necesar ca un experiment să fie derulat cel puțin pe parcursul unei săptămâni întregi, dacă nu mai mult, pentru a se limita efectul de sezonalitate.
+\end{remark}
+
+O limitare evidentă a testării A/B este aceea că ne aflăm în imposibilitatea de a testa variații pentru mai multe variabile și să cuantificăm efectul acestora, cât șî corelațiile acestora. De aceea a fost dezvoltat mecanismul de \textbf{\textit{testare cu variabile multiple}}. El este bazat pe acseeași idee centrala precum testarea A/B, însă se permite varierea mai multor variabile simultan. Deși poată parea mai atractivă, această metodă are nevoie de un \textit{eșantion} mult mai mare și de aceea nu este practică pentru produsele software ce nu se bucură de o popularitate deosebită. De asemenea, mecanismul de cuantificarea al efectelor este unul mult mai complex. De aceea, această metodă nu este folosită extensiv în industrie, și de aceea lucrarea nu va insista asupra acesteia, și sugerează cititorului consultarea \cite{johnson1992applied} pentru mai multe detalii.
+
+\subsection{Asignarea entităților}
+
+În cele ce urmează vom detalia modul în care sunt asignate entități către grupurile participante la test.
+
+\begin{remark}
+	Testarea de tip A/B nu se efectuează pe întrega populație ci doar pe o parte a acesteia.
+\end{remark}
+
+Motivul pentru care acest lucru se întâmplă este unul foarte simplu, se dorește ca prin limitarea expunerii populației la experiment să se obțină date semnificative din punct de vedere statistic, dar să se și limiteze în același timp posibilele efecte negative ale experimentului. Se va asocia identificatorului fiecărei entități, în mod deterministic, un număr natural, iar apoi se va folosi acesta, împreună cu un \textit{seed}\footnote{O valoare aleatorie fixată} pentru a se determina dacă aceasta participă sau nu la experiment.
+
+\begin{remark}
+	Pentru transformarea indentificatorului unei entități într-un număr se va folosi o funcție de dispersie.
+\end{remark}
+
+Pentru testarea A/B se vor determine de la început, \textit{în mod static}, dimensiunile grupurilorce vor participa la experiment. Un mod foarte utilizat de partiționare a experimentului în grupuri, este ca fiecare dintre acestea să aibe o pondere egală în întreg experimentul. Deoarece aceasta este abordarea standard folosită în industrie pentru astfel de experimente, ne vom raporta la aceasta. Avantajele unei astfel de abordări sunt oferite de simplitatea acesteia, atât pentru înțelegerea experimentului, dar și pentru implementarea acesteia.
+
+Pe de altă parte, abordarea statică are o serie de dezavantaje foarte mari. Cel mai mare dezavanataj este că nu e posibilă schimbarea distribuției grupurilor, și astfel nu se pot gestiona într-un mod corespunzător efectele experimentului. 
+
+\begin{remark}
+	Strategia de partiționare folosită va avea un regret egal cu
+	\[
+	\rho = T ( \mu^*  - \sum_{i = 1}^{n} \frac{1}{n} \overline{\mu_i})
+	\]
+\end{remark}
+
+De aceea, după cum am menționat, asignând fiecărui grup o pondere egală, se pot pierde oportunități importante, mai ales pentru aplicațiile software ce nu se bucură de un trafic foarte mare, sau se află la începutul produsului. Vom propune un mod de testare alternativ, ce are o serie de avantaje, împreună cu câteva strategii dezvoltate pentru a utiliza cât mai bine ideile ce urmează a fi enunțate.
+
+\section{Testare 'Multi-armed bandit'}
+
+Metoda de experimentarea pe care urmează să o prezentăm are la bază problema probabilistică a banditului cu mai multe brațe, ce este tratată cu interes în mai multe lucrări de specialitate. În această problemă, un parior are în fața sa o serie de mașini electronice de jocuri de noroc. Acesta trebuie să decidă de câte ori să joace fiecare mașină și în ce ordine, astfel încât ascesta sa maximize potențialul câștig printr-o secventă de trageri de manetă.
+
+Se observă astfel o analogie cu problema ce presupune asignarea unor entități în anumite grupuri de experimentare. Astfel, putem reformula problema pentru a căuta o strategie optimă de asignare a entităților astfel încât să maximizăm efectele pozitive cutantificate prin prisma unei metrice. De altfel, această metodă a fost folosită în studiile clinice pentru a minimiza pierderile asupra pacienților.
+
+Există un număr de soluții convergent optime, însă complexitatea acestora este una substanțială. Pe lângă acest fapt trebuie notat faptul că se urmărește doar minimizarea regretului, și nu se ține cont astfel de durata de convergență pentru a obține rezultate semnificative din punct de vedere statistic. Există și un număr de soluții \textit{aproximative}, iar lucrarea le va aminti pe cele ce sunt viabile în contextul dat.
+
+Sunt descrise o serie de strategii semi-uniforme ce sunt bazate pe aceeași idee centrală, dar ce diferă prin detaliile de implementare. Se identifică două faze centrale, \textit{faza de explorare} și \textit{faza de exploatare}.
+
+\textbf{Faza de explorare} este o strategie identică cu cea propusă de testarea A/B. De altfel, numele acesteia provine din scopul ei de a aduna date referitoare la performanța fiecărui grup.
+
+\textbf{Faza de exploatare} propune folosirea unor cunostințe acumulate din faza de explorare pentru a asigna entitățile către experimente într-un mod mai inteligent. Pentru strategiile următoare faza de explorare va consta în asignarea tuturor entităților către grupul cu cea mai bună performanță în faza de explorare.
+
+\begin{itemize}
+	\item \textbf{Epislon-Greedy}: Această strategie propune separarea entităților în două grupe, de proporție $\epsilon$ și $1 - \epsilon$, unde prima grupă va constitui faza de explorare iar cea de-a doua grupă va reprezenta faza de exploatare. Faza de exploatare și explorare se desfășoară în paralel.
+	\item \textbf{Epislon-first}: Această strategie presupune introducerea primelor $\epsilon N$ entități în faza de explorare, urmate apoi de $(1-\epsilon)N$ entități ce fac parte din faza de exploatare, urmând ca apoi procesul să se repete. Astfel, faza de explorare și exploatare se desfășoară secvențial.
+	\item \textbf{Epsilon-descrescător}: Este similară cu strategia \textit{Epsilon-Greedy}, dar propune scăderea termenului $\epsilon$ o dată cu creșterea dimensiunii experimentului.
+	\item \textbf{Epsilon-contextual}: Similară cu strategia \textit{Epsilon-Greedy}, dar propune recalcularea factorului $\epsilon$ în funcție de contextul experimentului.
+\end{itemize}
+
+Menționăm că cea mai utilizată și indicată strategie pentru un sistem de experimentare este cea de tipul \textit{Epislon-Greedy}, sau \textit{Epislon-descrecător}. O problemă a celei din urmă este aceea că în cazul experimentelor ce vor fi desfășurate pe o perioadă de timp extinsă, pentru a elimina efectul de sezonalitate, faza de explorare va avea un rol neseminificativ în ultimele stagii, și astfel informațiile referitoare la grupurile care nu sunt foarte performante nu vor fi cu mult îmbunătățite, iar acest lucru poate duce la o durată mai mare de convergență.
+
+Pe lângă strategiile propuse anterior, există o \textbf{strategie probabilistică}. Acestea propun o idee ingenioasă, conform căreia numărul de asginări către un anumit grup din cadrul experimentului ar trebui să reflecte probabilitatea ca acel grup să fie optim din punctul de vedere al metricii cuantificate. Această strategie mai poartă numele și de \textit{Bayesian Bandits}. Deși această abordare exploatează mai puțin informațiile acumulate, are avantajul de a acumula informații despre toate grupurile, la un ritm proporțional cu performanța acestora. Astfel, grupurile cele mai eficiente vor avea cele mai multe informații, iar acest fapt poate indica un timp de convergență mai scăzut decât pentru strategiile propuse anterior.
+
+Vom analiza așadar, în cele ce urmează strategia \textit{Eplison-Greedy} și \textit{Bayesian Bandits}. Pe lângă acestea, \textbf{lucrarea propune o abordare alternativă,} hibridă între ideile prezentate, pentru a o obține un compromis optim între toate abordările. Fie $\epsilon \in(0, \frac{1}{2})$ vom avea 3 grupe. Prima grupă va fi o grupă în care se va desfăsura faza de explorare în proprție constantă de $\epsilon$. În cea de-a doua grupă se va desfăsura faza de exploatare, tot în proporție de $\epsilon$. Ultima grupă va conține $1 - 2\epsilon$ din entitățile participante și va urma strategia probabilistică de asignare către grupurile experimentului.
+
+\section{Analiza strategiilor}
+
+În secțiunea de fața vom analiza toate strategiile, enumerate anterior, cuantificând metricele de regret, și timpul de convergență. Vom putea să determinăm astfel cât de eficiente sunt fiecare din aceste strategii: \textit{testare A/B}, \textit{Epsilon-Greedy}, \textit{Bayesian Bandits} și strategia hibridă propusă de lucrare. 
+
