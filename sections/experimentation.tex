@@ -62,6 +62,7 @@ O dată ce avem calculate statisticile $t$ și $\nu$, putem folosi distribuția 
 Am descris astfel modul de comparare a mediilor unei metrice pentru două grupuri de testare diferite. Rămâne să expunem modul de calcul al intervalelor de încredere pentru diferența mediilor, pentru o precizie $\alpha \in (0, 1)$. Avem următoarea formulă de calcul: \cite{miao}
 
 \begin{equation}
+\label{interval}
 \overline{X}_{text} - \overline{X}_{control} \pm t_{1 - \alpha/2, \nu} \
 \sqrt{ {\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}}}
 \end{equation}
@@ -89,14 +90,23 @@ Presupunem că există $n$ grupuri în experimentul nostru, și dorim să maximi
 \mu^* = \max_{i = \overline{1, n}}\{\mu_i\}
 \]
 
-Fie momentul $t$ ce va reprezenta asignarea a celei de-a $t$ entități către un grup. Vom nota cu $r_t$ valoarea metricei obținută prin asignarea efectuată. Putem să definim în mod formal regretul, pe care îl vom nota cu $\rho$, după ce am asignat $T$ entități.
+Fie momentul $t$ ce va reprezenta asignarea a celei de-a $t$ entități către un grup. Vom nota cu $r_t$ valoarea metricei obținută prin asignarea efectuată..
 
-\begin{equation}
+\begin{definition}
 \label{regret}
+Vom defini regretul, în mod normal cu următoarea formulă: 
+\[
 \rho = T * \mu^* - \sum_{i = 1}^{T}{r_i}
-\end{equation}
+\]
+\end{definition}
 
-\vspace{0.8cm}
+\begin{definition}
+\label{regretaverage}
+	Vom defini regretul mediu, pe care îl vom nota cu $\overline{\rho}$ astfel:
+	\[
+	\overline{\rho} = \frac{\rho}{T} = \mu^* - \frac{1}{T}\sum_{i = 1}^{T}{r_i}
+	\]
+\end{definition}
 
 \begin{definition}
 	O strategie se va numi optimă dacă $\rho$, regretul asociat, este 0 la oricare moment de timp $t$.
@@ -208,12 +218,122 @@ Motivația ce a condus la dezvoltarea acestei idei este aceea că prin păstrare
 
 \section{Analiza strategiilor}
 
-În secțiunea de fața vom analiza toate strategiile, enumerate anterior, cuantificând metricele de regret, și timpul de convergență. Vom putea să determinăm astfel cât de eficiente sunt fiecare din aceste strategii: \textit{testare A/B}, \textit{Epsilon-Greedy}, \textit{Bayesian Bandits} și strategia hibridă propusă de lucrare. 
+În secțiunea de fața vom analiza toate strategiile, enumerate anterior, cuantificând metricele de regret, și timpul de convergență. Vom putea să determinăm astfel cât de eficiente sunt fiecare din aceste strategii: \textit{testare A/B}, \textit{Epsilon-Greedy}, \textit{Bayesian Bandit} și strategia hibridă propusă de lucrare, pe car eo vom numi \textit{Hybrid Bandit}. 
 
 Vom presupune că vom avea de efectuat un experiment în care variem o singură valoare a unei variabile. De asemenea putem presupune, fără pierderea generalității că vom avea doar două grupuri, unul de control și unul de test. Am ales un astfel de cadrul simplist pentru analiză, deoarece acesta este cel mai des folosit în practică, și permite cititorului să își formeze o viziune de ansamblu asupra metodelor mai rapid. 
 
-\subsection{Rezultate teoretice}
+Ne amintim că am definit în ecuația \ref{interval} modlitate a afla intervalul de încredere corespunzător diferenței mediilor a două metrice. Pentru compararea diferitelor metode de asignare a entităților va trebui să comparăm durata de convergența și regretul. Folosind relațiile definite la începutul acestui capitol, putem să determinăm numărul mediu minim de iterații necesare, după care testul va converge și vom fi obținut rezultate semnificative din punct de vedere statistic. 
 
+Presupunem că știm mediile \textit{populației}, dar și deviațiile standard ale acestora, $\mu_{control}, mu_{test}$ respectiv $s_{control}, s_{test}$, pentru metricele monitorizate.
 
-\subsection{Metodologie de testare}
+\begin{remark}
+	\label{widthobs}
+	Dacă dimensiunea intervalului de încredere este mai mică decât diferența $|\mu_{control} - \mu_{test}|$, atunci testul va respinge ipoteza nulă, și va accepta ipoteza alternativă conform căreia cele două medii sunt diferite.
+\end{remark}
+
+Din ecuația \ref{interval} deducem următoarea formulă: 
+
+\begin{equation}
+\label{width}
+D =  t_{1 - \alpha, \nu} \sqrt{ {\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}}}
+\end{equation}
+
+\begin{remark}
+	Se va folosi $ t_{1 - \alpha, \nu}$ și nu $ t_{1 - \alpha/2, \nu}$ pentru determinarea lungimii intervalului de încredere.
+\end{remark}
+
+Considerând că din grupul de control vor face parte $\alpha N, \alpha \in (0, 1)$ entități, iar din grupul de test $\beta N, \beta \in (0, 1)$, unde $\alpha + \beta = 1$ și unde am notat $N = N_{test} + N_{control}$, vom putea rescrie ecuația \ref{width} astfel încât să determinăm numărul de iterații necesare minime, pentru a obține rezultate semnificative din punct de vedere statistic.
+
+\begin{remark}
+	Putem determina valoarea medie a timpului de convergență cu ajutorul formulei:
+\label{requiredsample}
+\[
+N =  \frac{
+	t_{1 - \alpha, \nu}^2 (\alpha s_{test}^2 + \beta s_{control}^2 )
+	}{
+	D^2 \alpha \beta
+	}
+\]
+\end{remark}
+
+\begin{proof}
+	Vom pleca de la ecuația \ref{width}:
+\[
+D =  t_{1 - \alpha, \nu} \sqrt{ {\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}}}
+\]	
+
+\[
+D^2 =  t_{1 - \alpha, \nu}^2 ({\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}})
+\]	
+
+\[
+\frac{D^2}{ t_{1 - \alpha, \nu}^2 }= {\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}}
+\]	
+
+Cum $N_{control} = \alpha * N$, și $N_{test}  = \beta * N$ avem:
+
+\[
+\frac{D^2}{ t_{1 - \alpha, \nu}^2 }= {\frac{s_{test}^2}{\beta N} }+ {\frac{s_{control}^2}{\alpha N}}
+\]	
+
+\[
+\frac{D^2}{ t_{1 - \alpha, \nu}^2 }= \frac{\alpha s_{test}^2 + \beta s_{control}^2}{\alpha \beta N}
+\]
+
+\[
+\frac{N D^2}{ t_{1 - \alpha, \nu}^2 }= \frac{\alpha s_{test}^2 + \beta s_{control}^2}{\alpha \beta}
+\]
+
+\[
+N =  \frac{
+	t_{1 - \alpha, \nu}^2 (\alpha s_{test}^2 + \beta s_{control}^2 )
+}{
+D^2 \alpha \beta
+}
+\]
+\end{proof}
+
+Am arătat astfel că dacă știm distirbuția de asignare a entităților în cele două grupuri, alături de cele informațiile legate de medie și deviație standard pentru metricele \textit{populațiilor}, putem determina numărul mediu de iterații după care vom atinge rezultate seminficative din punct de vedere statistic.
+
+Pentru a compara două metode, va trebui să analizăm și regretul mediu al acestora. Ne amintim că am definit regretul în relația \ref{regret}. Deoarece vom folosi un experiment în care cuantificăm o metrică binară, putem rescrie formula astfel:
+
+\begin{equation}
+\label{particularregret}
+	\rho = T \mu^* - T(\alpha \mu_{control}  +  \beta \mu_{test})
+\end{equation}
+
+Pentru a efectua o comparație obiectivă, ne vom folosi de valoarea medie a regretului, pe care din relația \ref{regretaverage} și \ref{particularregret} o putem scrie astfel: 
+
+\begin{equation}
+\label{particularregretaverage}
+	\overline{\rho} = \mu^* - (\alpha \mu_{control}  +  \beta  \mu_{test})
+\end{equation}
+
+\begin{remark}
+\label{particularaverageregret}
+	Dacă presupunem $\mu_{control} > \mu_{test}$, fără pierderea generalității, putem scrie formula regretului mediu astfel:
+	
+	\[
+		\overline{\rho} = \beta (\mu_{control} - \mu_{test})
+	\]
+\end{remark}
+
+\begin{proof}
+	
+	\[
+		\overline{\rho} = \mu^* - (\alpha \mu_{control}  +  \beta  \mu_{test})
+	\]
+	
+	\[
+	\overline{\rho} = (\alpha + \beta)\mu_{control} - (\alpha \mu_{control}  +  \beta  \mu_{test})
+	\]
+	
+	\[
+	\overline{\rho} = \beta (\mu_{control} - \mu_{test})
+	\]
+\end{proof}
+
+\subsection{Rezultate}
+
+Folosind rezultatele exprimate la observațiile \ref{requiredsample}  și \ref{particularaverageregret}, vom construi o serie de grafice ajutătoare pentru a putea compara toate modalitațile descrise. Acestea ne vor ajuta să identificăm vizual avantajele și dezavantajale fiecăreia dintre acestea, și ne va permite să concluzionăm mai apoi asupra celei mai potrivite dintre acestea.
 
