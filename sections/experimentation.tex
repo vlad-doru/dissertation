@@ -104,7 +104,7 @@ Vom defini regretul, în mod normal cu următoarea formulă:
 \label{regretaverage}
 	Vom defini regretul mediu, pe care îl vom nota cu $\overline{\rho}$ astfel:
 	\[
-	\overline{\rho} = \frac{\rho}{T} = \mu^* - \frac{1}{T}\sum_{i = 1}^{T}{r_i}
+	\overline{\rho} = \frac{\rho}{T * \mu*} = 1 - \frac{1}{T * \mu^*}\sum_{i = 1}^{T}{r_i}
 	\]
 \end{definition}
 
@@ -311,10 +311,10 @@ Pentru a efectua o comparație obiectivă, ne vom folosi de valoarea medie a reg
 
 \begin{remark}
 \label{particularaverageregret}
-	Dacă presupunem $\mu_{control} > \mu_{test}$, fără pierderea generalității, putem scrie formula regretului mediu astfel:
+	Dacă presupunem $\mu_{test} > \mu_{control}$, fără pierderea generalității, putem scrie formula regretului mediu astfel:
 	
 	\[
-		\overline{\rho} = \beta (\mu_{control} - \mu_{test})
+		\overline{\rho} = \beta (\mu_{test} - \mu_{control})
 	\]
 \end{remark}
 
@@ -335,5 +335,132 @@ Pentru a efectua o comparație obiectivă, ne vom folosi de valoarea medie a reg
 
 \subsection{Rezultate}
 
-Folosind rezultatele exprimate la observațiile \ref{requiredsample}  și \ref{particularaverageregret}, vom construi o serie de grafice ajutătoare pentru a putea compara toate modalitațile descrise. Acestea ne vor ajuta să identificăm vizual avantajele și dezavantajale fiecăreia dintre acestea, și ne va permite să concluzionăm mai apoi asupra celei mai potrivite dintre acestea.
+Folosind rezultatele postulate de observațiile \ref{requiredsample}  și \ref{particularaverageregret}, vom construi o serie de grafice ajutătoare pentru a putea compara toate modalitațile descrise. Acestea ne vor ajuta să identificăm vizual avantajele și dezavantajale fiecăreia, și ne va permite să concluzionăm mai apoi asupra celei mai potrivite strategii.
+
+Atât pentru regret, cât și pentru timpul de convergență, vom utiliza grafice de tipul \textit{heatmap}\footnote{Diagramă colorată cu intensități diferite, în funcție de valoarea funcției}. Oe axa \textit{oy} vom reprezenta valoareaa medie a metricei în grupul de test, în timp ce axa \textit{oy} va corespunde valorii medie a metricei pentru entitățile de control. De asemenea, vom folosi o reprezentare ce poartă numele de \textit{hexbin}, pentru a putea aggrega o serie de valori, sub forma mediei, ce se află în vecinătatea unui punct central.
+
+\subsubsection{Testarea A/B}
+
+În contextul definit anterior, vom avea dimiensiunile celor două grupuri egale, de dimensiune$1/2$, și vom obține un regret mediu dat de formula:
+
+\[
+	\overline{\rho}_{ab} = \frac{1}{2} * (\mu_{text} - \mu_{control})
+\]
+	
+Se poate vizualiza foarte ușor modul în care funcționează regretul, dar și durata de convergență, în figura \ref{fig:ab_evaluation}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{ab_regret}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{ab_conv}
+	\end{subfigure}
+	\caption{Regretul și durata de convergența pentru testarea A/B\\}
+	\label{fig:ab_evaluation}
+\end{figure}
+
+Se observă cum, atunci când cele două grupuri au valori ale metricelor cât mai apropiate, este necesar un număr mai mare de iterații pentru a putea determina din punct de vedere statistic că acestea sunt diferite. Pe de altă parte, datorită naturii statice a metodei de testare A/B, cu cât diferența dintre metrice este mai mare, cu atât se obține un regret mediu mai mare.
+
+\subsubsection{Greedy Epsilon}
+
+Conform acestei strategii, regretul mediu va converge către următoarea formulă: \[
+	\overline{\rho}_{\epsilon} = \frac{1}{2} \epsilon * (\mu_{text} - \mu_{control}) 
+\]
+
+Ținând cont de formula prezentată mai sus pentru regretul mediu al abordării testării A/B, se poate observa că obținem un factor de îmbunătățire egal cu $\frac{1}{\epsilon}$. Astfel, pentru $\epsilon = 0.1$ vom avea un regret mediu de 10 ori mai mic, iar acest fapt reprezintă un mare avantaj pentru strategia de tip \textit{Greedy-Epsilon}. Pe de altă parte, vom examina diferențele în ceea ce privește timpii de convergența ai acestei strategii față de testarea A/B.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[max height=5cm,keepaspectratio]{ab_vs_epsilon_conv}
+	\caption{Numărul de iterații necesare pentru convergență, cu metoda Greedy Epsilon, raportat relativ la testarea  A/B}
+	\label{fig:ab_vs_epsilon_conv}
+\end{figure}
+
+În figura \ref{fig:ab_vs_epsilon_conv} se poate observa cum timpul de convergență a crescut de până la 8 ori, iar mediana creșterii este de \textit{4.24} ori. Astfel, se încetinește foarte mult iterarea rapidă asupra unui produs. 
+
+\begin{remark}
+	Vom folosi mediana și nu media pentru comparații pentru a putea evita efectul produse de \textit{outliere}\footnote{Valori ce sunt cu mult diferite de restul distribuției}
+\end{remark}
+
+De aceea, lucrarea sugerează folosirea, în general, a testării A/B, înaintea strategiilor de tipul \textit{Greedy Epsilon}.
+
+\subsubsection{Bayesian Bandit}
+
+Reamintim că acest tip de strategie folosește informațiile \textit{a priori} despre mediile grupurilor pentru a determina modul de asignare a entităților. De aceea, regretul mediu va fi dat de formula 
+
+\[
+\overline{\rho}_{bayesian} = \frac{\mu_{control}}{\mu_{control} + \mu_{test}} * (\mu_{text} - \mu_{control})
+\]
+
+\begin{remark}
+	Regretul mediu pentru această strategie este întotdeauna mai mic decât regretul mediu pentru testarea A/B, $\overline{\rho}_{bayesian} < \overline{\rho}_{ab}$.
+\end{remark}
+
+
+\begin{proof}
+Cum am presupus fără pierderea generalității că $\mu_{test} > \mu_{control} \Rightarrow$
+
+\[
+\frac{\mu_{control}}{\mu_{control} + \mu_{test}} < \frac{\mu_{control}}{\mu_{control} + \mu_{control}} = \frac{1}{2} \Rightarrow
+\]
+\[
+\overline{\rho}_{bayesian} < \overline{\rho}_{ab}
+\]
+\end{proof}
+
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{ab_vs_bayesian_regret}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{ab_vs_bayesian_conv}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Comparație relativă între Bayesian Bandit și testarea A/B}
+	\label{fig:ab_vs_bayesian}
+\end{figure}
+
+Se poate observa în figura \ref{fig:ab_vs_bayesian}, optimizarea regretului. De altfel, mediana indică o optimizare cu \textit{33\%} a regretului. Pe de altă parte, numărul de iterații necesare pentru a obține convergența crește seminifcativ doar pentru așa numitele \textit{edge-cases}, în care diferența între cele două grupuri este considerabilă. Mediana indică o creștere doar de \textit{0.06} ori a numărului de iterații necesar. Așadar, lucrarea propune utilizarea strategiei \textbf{Bayesian Bandit}, în detrimentul testării A/B.
+
+\subsubsection{Hybrid Bandit}
+
+Aceasta este abordarea alternativă pe care o propune lucrarea, și are ca scop eliminarea creșterii foarte mari a duratei de convergență pentru \textit{edge-cases}, păstrând în același timp avantajele aduse de abordarea descrisă sub numele de \textit{Bayesian Bandit}. Formula regretului este una mai complicată, dar care poate fi scrisă elegant ca o relație liniară între cele trei formule determinate anterior, astfel:
+
+\[
+\overline{\rho}_{hybrid} = \alpha * \overline{\rho}_{ab}  + \beta * \overline{\rho}_{\epsilon} + (1 - (\alpha + beta)) * \overline{\rho}_{bayesian} 
+\]
+
+În cazul curent, am ales $\alpha = \beta = 0.1$ pentru a fi consistent cu practicile cele mai uzitate în industrie.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{hybrid_vs_bandit_regret}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{hybrid_vs_bandit_conv}
+	\end{subfigure}
+	\caption{Comparație relativă între Hybrid Bandit și Bayesian Bandit}
+	\label{fig:hybrid_vs_bayesian}
+\end{figure}
+
+Se poate observa în figura \ref{fig:hybrid_vs_bayesian} că, deși avem un regret mediu mai mare pentru acele \textit{edge cases}, se obține o durată de convergentă până la de 4 ori mai bună. Pentru restul cazurilor, cele două metode nu prezintă diferențe semnificative. Am reușit deci să adresăm problema obținerii rezultatelor seminificative pentru cazurile speciale.
+
+\subsection{Concluzii}
+
+Deși reprezintă un mecanism rudimentar, testarea A/B se comportă surprinzător de bine. Strategia de tip \textit{Greedy Epsilon} este una defectuoasă, cu o serie întreagă de lacune. \textit{Bayesian Bandit} reprezintă o abordare ingenioasă, ce se comportă mai bine decât testarea A/B în general, dar are probleme atunci când diferențele metricelor între cele două grupuri sunt foarte mari, din punctul de vedere al iterației de dezvoltare. 
+
+În final, abordarea hibdridă, propusa de lucrare, prezintă un mecanism simplu, inegnios, și eficient în același timp, construind peste strategia descrisă de \textit{Bayesian Bandit}, adresând problemele pe \textit{edge cases}. De aceea, lucrarea propune această metodă ca o alternativă general viabilă și validă, față de cele descrise în literatură.
+
 

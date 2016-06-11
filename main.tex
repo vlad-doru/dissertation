@@ -15,6 +15,9 @@
 \usepackage{amsthm}
 \usepackage{listings}
 \usepackage{float}
+\usepackage[toc,page]{appendix}
+\usepackage[demo]{graphicx}
+\usepackage{subcaption}
 
 \lstdefinelanguage{proto3}%
 {morekeywords=[1]{message, package,import,func,type,struct,return,defer,panic,%
@@ -37,6 +40,10 @@
 
 % Line spacing
 \renewcommand{\baselinestretch}{1.35} 
+\renewcommand\appendixtocname{Anexe}
+\renewcommand\appendixname{Anexe}
+\renewcommand\appendixpagename{Anexe}
+
 
 \graphicspath{{images/}{../images/}}
 
@@ -67,5 +74,7 @@
 
 \bibliographystyle{plain}
 \bibliography{bibliography/list} 
+
+\subfile{sections/appendix_r}
 
 \end{document}

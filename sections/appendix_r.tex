@@ -1,0 +1,148 @@
+\begin{appendices}
+\chapter{Cercetări experimentale}
+
+\section{Analiza timpului de convergență}
+
+Următorul cod a fost utilizat pentru a crea o serie de vizualizări, destinate unei înțelegeri îmbunatățite fața de diverse moduri de asignare a experimentelor.
+
+\begin{center}
+	\begin{lstlisting}[language=r]
+library(plyr)
+library(ggplot2)
+library(scales)
+
+x <- seq(0.01, 1, 0.01)
+y <- seq(0.01, 1, 0.01)
+data <- expand.grid(x, y)
+colnames(data) <- c("p1", "p2")
+head(data)
+
+plotConvergence <- function(data, title) {
+	ggplot(data, aes(p1, p2, z = n)) +  
+		stat_contour() + 
+		geom_tile(aes(fill = n)) + 
+		scale_fill_gradient(
+			name = "Timp convergenta",
+			limits = c(0, 10000),
+			na.value = '#ff3333',
+			low = "#ffffff",
+			high = "#ff3333"
+		) +
+		labs(x = "Grup 1", y = "Grup 2") +
+		ggtitle(title)
+}
+
+computeConvergence <- function(eps, p1, p2) {
+	a <- (1.66 ^ 2)  * 
+		( eps * p1 * (1 - p1) + (1 - eps) *  p2 * (1 - p2))
+	b <- (abs(p1 - p2)^2) * eps * (1 - eps)
+	a / b
+}
+
+evaluateConvergence <- function(epsilon, name) {
+	n <- mdply(data, function(p1, p2) {
+		eps <- epsilon(p1, p2)
+		c <- computeConvergence(eps, p1, p2)
+		if (is.infinite(c)) NA else c
+	})
+	names(n) <- c('p1', 'p2', 'n')
+	print(plotConvergence(n, name))
+	n
+}
+
+
+
+ab.epsilonFn <- function(p1, p2) {
+	0.5
+}
+
+epsilon.epsilonFn <- function(p1, p2) {
+	if (p1 > p2) 0.95 else 0.05
+}
+
+prob.epsilonFn <- function(p1, p2) {
+	p1 / (p1 + p2)
+}
+
+hybrid.epsilonFn <- function(p1, p2) {
+	epsExploit <- if (p1 >= p2) 1.0 else 0.0
+	epsExplore <- 0.5
+	epsProb <- p1 / (p1 + p2)
+	alpha <- 0.1
+	beta <- 0.1
+	eps <- alpha * epsExploit + 
+		beta * epsExplore + 
+		(1 - (alpha + beta)) * epsProb
+	eps
+}
+
+ab.convergence <- evaluateConvergence(
+	ab.epsilonFn, 
+	"Testare AB")
+epsilon.convergence <- evaluateConvergence(
+	epsilon.epsilonFn, 
+	"Greedy Epsilon")
+prob.convergence <- evaluateConvergence(
+	prob.epsilonFn, 
+	"Probabilistic Bandit")
+hybrid.convergence <- evaluateConvergence(
+	hybrid.epsilonFn, 
+	"Hybrid Bandit")
+	\end{lstlisting}
+\end{center}
+
+\section{Analiza regretului}
+
+Folosind o parte din funcțiile expuse anterior, vom construi o serie de funcții utile pentru studiul regretului.
+
+\begin{center}
+	\begin{lstlisting}[language=r]
+plotRegret <- function(data, title) {
+	ggplot(data, aes(p1, p2, z = r)) +  
+		stat_contour() + 
+		geom_tile(aes(fill = r)) + 
+		scale_fill_gradient(
+			name = "Regretul mediu",
+			limits = c(0, 1),
+			low = "#ffffff",
+			high = "#ff3333"
+		) +
+		labs(x = "Grup 1", y = "Grup 2") +		
+		ggtitle(title)
+}
+
+
+
+
+
+evaluateRegret <- function(epsilon, name) {
+	r <- mdply(data, function(p1, p2) {
+		eps <- epsilon(p1, p2)
+		if (p1 < p2) 
+			eps * (p2 - p1) 
+		else 
+			(1 - eps) * abs(p1 - p2)
+	})
+	names(r) <- c('p1', 'p2', 'r')
+	print(plotRegret(r, name))
+	r
+}
+
+ab.regret <- evaluateRegret(
+	ab.epsilonFn, 
+	"Testare AB")
+epsilon.regret <- evaluateRegret(
+	epsilon.epsilonFn, 
+	"Greedy Epsilon")
+prob.regret <- evaluateRegret(
+	prob.epsilonFn, 
+	"Probabilistic Bandit")
+hybrid.regret <- evaluateRegret(
+	hybrid.epsilonFn, 
+	"Hybrid Bandit")
+
+	\end{lstlisting}
+\end{center}
+
+\end{appendices}
+
