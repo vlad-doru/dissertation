@@ -84,15 +84,15 @@ hybrid.epsilonFn <- function(p1, p2) {
   eps
 }
 
-# ab.regret <- evaluateRegret(ab.epsilonFn, "Testare A/B")
-# epsilon.regret <- evaluateRegret(epsilon.epsilonFn, "Greedy Epsilon")
-# prob.regret <- evaluateRegret(prob.epsilonFn, "Probabilistic Bandit")
-# hybrid.regret <- evaluateRegret(hybrid.epsilonFn, "Hybrid Bandit")
-# 
-# ab.convergence <- evaluateConvergence(ab.epsilonFn, "Testare A/B")
-# epsilon.convergence <- evaluateConvergence(epsilon.epsilonFn, "Greedy Epsilon")
-# prob.convergence <- evaluateConvergence(prob.epsilonFn, "Probabilistic Bandit")
-# hybrid.convergence <- evaluateConvergence(hybrid.epsilonFn, "Hybrid Bandit")
+ab.regret <- evaluateRegret(ab.epsilonFn, "Testare A/B")
+epsilon.regret <- evaluateRegret(epsilon.epsilonFn, "Greedy Epsilon")
+prob.regret <- evaluateRegret(prob.epsilonFn, "Probabilistic Bandit")
+hybrid.regret <- evaluateRegret(hybrid.epsilonFn, "Hybrid Bandit")
+ 
+ab.convergence <- evaluateConvergence(ab.epsilonFn, "Testare A/B")
+epsilon.convergence <- evaluateConvergence(epsilon.epsilonFn, "Greedy Epsilon")
+prob.convergence <- evaluateConvergence(prob.epsilonFn, "Probabilistic Bandit")
+hybrid.convergence <- evaluateConvergence(hybrid.epsilonFn, "Hybrid Bandit")
 
 analyzeDiff <- function(A, B, title) {
   t <- ((A - B) / A)
@@ -102,12 +102,16 @@ analyzeDiff <- function(A, B, title) {
 }
 
 
-x <- 100 * (hybrid.regret$r - prob.regret$r) / prob.regret$r
-plotData(x,"Hybrid Bandit vs Bayesian Bandit - Regret", low_col="#66cc00", name = "Diferenta relativa (%)")
+x <-  (prob.regret$r - hybrid.regret$r) / prob.regret$r
+plotData(x,"Hybrid Bandit vs Bayesian Bandit - Regret", low_col="red", name = "Diferenta relativa (x ori)")
 summary(x)
 
-x <- (hybrid.convergence$n - prob.convergence$n) / prob.convergence$n
-plotData(x,"Hybrid Bandit vs Bayesian Bandit - Convergenta", high_col="red", name = "Iteratii suplimentare (x ori)")
+x <- (prob.convergence$n - hybrid.convergence$n) / hybrid.convergence$n
+plotData(x,"Hybrid Bandit vs Bayesian Bandit - Convergenta", high_col="#66cc00", name = "Iteratii suplimentare (x ori)")
+summary(x)
+
+x <- (hybrid.convergence$n - ab.convergence$n) / ab.convergence$n
+plotData(x,"Hybrid Bandit vs AB - Convergenta", high_col="red", name = "Iteratii suplimentare (x ori)")
 summary(x)
 
 x <- (hybrid.convergence$n - ab.convergence$n) / ab.convergence$n
