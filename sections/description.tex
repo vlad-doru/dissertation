@@ -1,76 +1,102 @@
 \chapter{Arhitectura sistemului}
 
-În acest capitol vom construi arhitectura sistemului, astfel încât aceasta să își atingă scopul precizat anterior, ținând cont de proprietățile enumerate pe care soluția trebuie să le aibă. Pentru o descriere mai amplă și mai organizată a arhitecturii vom apela la metologiile clasice folosite în dezvoltarea arhitecturilor software.
+În acest capitol vom construi arhitectura sistemului, astfel încât aceasta să înlesnească atingerea scopului descris anterior, ținând cont de proprietățile enumerate pe care soluția trebuie să le îndeplinească. Pentru o descriere mai amplă și organizată a arhitecturii vom apela la metologiile cele mai folosite în dezvoltarea arhitecturilor software. \cite{architecture}
 
 \section{Părțile implicate}
 
-Părțile implicate, sau \textit{stakeholderii} cum mai sunt denumite acestea în literatură, sunt în număr de 3. Avem astfel dezvoltatorul sistemului de experimentare, clientul serviciului (dezvoltatorul aplicației principale) și utilizatorul final al aplicației principale. Ne vom concentra în cele ce urmează pe ultimele două părți.
+\index{părți implicate}
+Părțile implicate, sau \textit{stakeholderii} cum mai sunt denumite acestea în literatură, sunt în număr de 3. Putem identifica dezvoltatorul sistemului de experimentare, clientul serviciului (dezvoltatorul aplicației centrale) și utilizatorul final al prosului software. Ne vom concentra atenția în cele ce urmează asupra ultimelor două părți.
 
-\textbf{\textit{Clientul sistemului}} este reprezentat de dezvoltatorul produsului ce necesită efectuarea experimentelor. Acesta dorește să poată folosi cât mai ușor sistemul de experimentare, prin intermediul unui număr cât mai mare de limbaje de programare. Interesul acestuia este ca serviciul pe care lucrarea îl propune să fie cât mai flexibil și extensibil, pentru a oferi acestuia posibilitatea de a fructifica cât mai multe oportunități, evitând adăugarea complexității suplimentare aplicației inițiale, prin gestionarea experimentelor în codul acesteia.
+\index{clientul sistemului}
+\textbf{\textit{Clientul sistemului}} este reprezentat de dezvoltatorul produsului, care solicită efectuarea experimentelor. Acesta dorește să poată folosi cât mai ușor sistemul, prin intermediul unui număr cât mai mare de limbaje de programare. Interesul acestuia este ca serviciul pe care lucrarea îl propune să fie cât mai flexibil și extensibil, pentru a oferi posibilitatea de a fructifica cât mai multe oportunități, evitând adăugarea complexității suplimentare aplicației inițiale, prin gestionarea experimentelor în codul acesteia.
 
-\textbf{\textit{Utilizatorul final}} este cel căruia i se adresează produsul software principal dezvoltat. Acesta dorește ca aplicația să poată răspunde foarte rapid comenzilor acestuia, iar asta lucru înseamna că serviciul pe care lucrarea îl propune nu trebuie să reprezinte un \textit{bottleneck}\footnote{O componentă ce încetinește întreg sistemul} pentru întreaga aplicație.
+\index{utilizatorul final}
+\textbf{\textit{Utilizatorul final}} este cel căruia i se adresează aplicația software principală. Acesta dorește ca produsul să poată răspunde foarte rapid comenzilor acestuia, iar aceasta implică faptul că serviciul pe care lucrarea îl propune nu trebuie să reprezinte un \textit{bottleneck}\footnote{O componentă ce încetinește întreg sistemul} pentru întreaga aplicație.
 
 \subsection{Perspectiva funcțională}
 
 Având părțile implicate definite, vom trece mai departe să conturăm perspectiva funcțională a fiecăreia dintre acestea.
 
-\textbf{\textit{Clientul sistemului}} va dori să poată să gestioneze lista experimentelor, prin adăugare și ștergere, și să poată vizualiza lista cu cele disponibile. Va putea de asemenea să definească valorile variabilelor din cadrul unui experiment. Pe lângă aceste aspecte, în codul aplicației principale va dori să se efectueze un apel, având ca parametrii identificatorul experimentului și identificatorul entității, iar mai apoi să obțină toți parameterii variabilelor, \textit{pentru toate experimentele} în care entitate respectivă se va regăsi.
+\textbf{\textit{Clientul sistemului}} va dori să poată să gestioneze lista experimentelor, prin adăugarea și ștergerea lor, și să poată vizualiza lista cu cele disponibile. Va putea de asemenea să definească valorile variabilelor din cadrul unui experiment. Pe lângă aceste aspecte esențiale, în codul aplicației principale va dori să se efectueze un apel, având ca parametrii identificatorul experimentului și identificatorul entității, iși să obțină astfel toți parameterii variabilelor, \textit{pentru toate experimentele} în care entitatea respectivă se va regăsi.
 
+\index{imutabilitatea experimentului}
 \begin{remark}
-	Deși există sisteme de experimentare ce oferă posibilitatea editării parameterilor unui experiment, lucrarea consideră această abordare defectuoasă, deoarece astfel de operații pot invalida rezultatele finale. De aceea vom considera definiția unui experiment ca o valoare \textbf{imutabilă}\footnote{Toți parameterii vor avea valori constante, ce nu pot fi modificate}. 
+	\label{remark:no_edit_exp}
+	Deși există sisteme de experimentare ce oferă posibilitatea editării parameterilor unui experiment, lucrarea consideră această abordare ca fiind defectuoasă, deoarece astfel de operații pot invalida rezultatele finale. De aceea vom considera definiția unui experiment ca o valoare \textbf{imutabilă}\footnote{Toți parameterii vor avea valori constante, ce nu pot fi modificate}. 
 \end{remark}
 
-\textbf{\textbf{Utilizatorul final}}, este cel care va fi inclus în anumite experimente, și de aceea dorește ca experiența sa să fie una cât mai uniformă în cadrul aplicației principale. De exemplu, dacă se testează eficiența dispunerii unui anumit buton în cadrul unei aplicații, clientul va dori să vadă, la fiecare vizită, butonul în aceeași poziție. De altfel, dacă acesta ar observa dispuneri diferite, rezultă ca elementele eșantionului nu au fost identic și independent distribuite. Din acest lucru reiese ca sistemul de experimentare va trebui să asocieze în mod consistent o entitate în cadrul aceluiași grup dintr-un experiment. 
+\textbf{\textbf{Utilizatorul final}}, este cel care va fi inclus în anumite experimente, iar de aceea dorește ca experiența sa să fie una cât mai uniformă în cadrul aplicației principale. De exemplu, dacă se testează eficiența dispunerii în pagină a unui anumit buton în cadrul unei aplicații, clientul va dori să vadă, la fiecare vizită, butonul în aceeași poziție. De altfel, dacă acesta ar observa dispuneri diferite, rezultă ca observațiile nu au fost identic și independent distribuite. Din acest lucru reiese ca sistemul de experimentare va trebui să asocieze în mod consistent o entitate în cadrul aceluiași grup dintr-un experiment. 
 
 \section{Calități arhitecturale de sistem}
 
-Vom prezenta în cele ce urmează calitățile arhitecturale de sistem, importante pentru serviciul pe care dorim să îl dezvoltăm. În același timp vom menționa tacticile și stilurile arhitecturale pe care le vom utiliza pentru a reuși implementarea aceste calități.
+Vom prezenta în cele ce urmează calitățile arhitecturale de sistem, importante pentru serviciul pe care dorim să îl dezvoltăm. În același timp vom menționa tacticile și stilurile arhitecturale pe care le vom utiliza pentru a reuși implementarea acestora.
 
-\textbf{\textit{Adaptabilitatea}} este una din cele mai importante calități arhitecturale de sistem pentru un serviciu de experimentare. După cum am argumentat, considerăm vitală posibilitatea de a adăuga funcționalități, într-un mod facil și rapid, la sistemul dezvoltat, fiecare client al aplicație având nevoi diferite.
+\index{adaptabilite}
+\textbf{\textit{Adaptabilitatea}} este una din cele mai importante calități arhitecturale de sistem pentru un serviciu de experimentare. După cum am argumentat, considerăm vitală posibilitatea de a adăuga funcționalități, într-un mod facil și rapid, fiecare client al aplicație având nevoi diferite.
 
-Pentru a putea îndeplini această calitate arhitecturală, vom folosi o serie de diverse tactici. Prima este aceea de a efectua o abstractizare a modulelor sistemului astfel încât să existe \textit{cât mai puține dependențe} între acestea. De asemenea vom folosi \textit{coerența semantică}, prin care fiecare modul va avea o funcționalitatea bine definită, iar relațiile între acestea vor fi definite riguros. Astfel, de fiecare dată când vom executa o modificare vom putea identifica toate modulele ce necesită modificări.
+Pentru a putea atinge această calitate arhitecturală, vom folosi o combinație de diverse tactici. Prima este aceea de a efectua o abstractizare a modulelor sistemului astfel încât să existe \textit{cât mai puține dependențe} între componente. De asemenea vom folosi \textit{coerența semantică}, prin care fiecare modul va avea o funcționalitate bine definită, iar relațiile dintre acestea vor fi definite riguros. Astfel, de fiecare dată când vom executa o modificare vom putea identifica toate modulele ce necesită actualizări.
 
-\textbf{\textit{Disponibilitatea}} este o altă calitate arhitecturală importantă. În orice aplicație modernă, experimetarea constituie un element primordial, aceasta regăsindu-se atât pe partea de \textit{frontend}, prin testarea diferitelor interfețe, cât și pe partea de \textit{backend}, prin compararea performanței algoritmilor. De aceea trebuie ca serviciul de experimentare să fie disponibil pe o durată cât mai îndelugată de timp, și să se limiteze  perioada de \textit{downtime}\footnote{Durata de timp în care sistemul nu este disponibil.}.
+\index{disponibilitate}
+\textbf{\textit{Disponibilitatea}} este o altă calitate arhitecturală importantă. În orice produs software modern, experimetarea constituie un element central, aceasta regăsindu-se atât pe partea de \textit{frontend}, prin testarea diferitelor interfețe, cât și pe partea de \textit{backend}, prin compararea performanței algoritmilor. De aceea trebuie ca serviciul de experimentare să fie disponibil pe o durată cât mai îndelugată de timp, și să se limiteze perioada de \textit{downtime}\footnote{Durata de timp în care sistemul nu este disponibil.}.
 
-Tactica pe care o vom folosi este aceea de a dezvolta o \textit{arhitectură distribuită}, astfel încât să evităm existentă unui \textit{single point of failure}\footnote{O componentă a sistemului care în caz de eroare compromite întreg sistemul}. Detectarea erorilor se va face folosind o tactică de tipul \textit{heartbeat}, în care vom verifica periodic starea unei componente a sistemului. Astfel, fiecare modul al aplicației, identificat anterior, în cazul în care nu va funcționa corect, nu va compromite întreg sistemul, deoarece responsabilitățile acestuia vor fi preluate de un alt modul identic ce va rula în paralel într-un alt mediu.
+Tactica pe care o vom folosi este aceea de a dezvolta o \textit{arhitectură distribuită}, astfel încât să evităm existența unui \textit{single point of failure}\footnote{O componentă a sistemului care în caz de eroare compromite întreg sistemul}. Detectarea erorilor se va face folosind o tactică de tipul \textit{heartbeat}, în care vom verifica periodic starea unei componente a sistemului. Astfel, fiecare modul al aplicației, identificat anterior, în cazul în care nu va funcționa corect, nu va compromite întreg sistemul, deoarece responsabilitățile acestuia vor fi preluate de un alt modul identic ce va rula în paralel într-un mediu diferit.
 
-\textbf{\textit{Scalabilitatea}} sistemului este esențială. Ne dorim ca produsul să poată fi folosit atât de companii mici, \textit{start-up-uri}, dar și de companii mai mari, iar acest lucru presupune posibilitatea de a rula sistemul pe o gamă variată de resurse. Prin rularea distribuită, vom putea scala sistemul pe orizontală, prin simpla adăugarea a mai multor servere, evitând scalarea pe verticală, ce presupune mărirea resurselor mașinilor pe care este rulată aplicația, fiind cunoscut faptul că astfel de investiții sunt substanțiale, și greu de implementat.
+\index{scalabilitate}
+\textbf{\textit{Scalabilitatea}} sistemului este poate cea mai importantă calitate arhitecturală. Ne dorim ca produsul să poată fi folosit atât de companii mici, \textit{start-upuri}, dar și de companii mai mari, iar acest fapt presupune posibilitatea de a rula sistemul pe o gamă variată de platforme. Prin rularea distribuită, vom putea scala sistemul pe orizontală, prin simpla adăugarea a mai multor instanțe, evitând scalarea pe verticală, ce presupune mărirea resurselor mașinilor pe care este rulată aplicația. Este cunoscut că astfel de investiții sunt substanțiale, și sunt greu de implementat, spre deosebire de abordarea pe care o propunem.
 
-\textbf{\textit{Performanța}} este una din calitățile arhitecturale asupra căreia trebuie să acordăm atenție. Pentru a obține o \textit{performanță} cât mai bună, vom folosi tactica gestionării resurselor, introducând \textit{concurența} în interiorul sistemului. Având în vedere faptul că vom avea foarte multe cereri către sistem, ce vor trebui rezolvate în același timp, este natural să urmăm o astfel de tactică. Nu în ultimul rând, concurența este ușor de modelat, și în funcție de mediul în care rulează serviciul poate implica paralelism.
+\index{performanța}
+\textbf{\textit{Performanța}} este una din calitățile asupra căreia trebuie să acordăm atenție. Pentru a obține o \textit{performanță} cât mai bună, vom folosi tactica gestionării resurselor, introducând \textit{concurența} în interiorul sistemului. Având în vedere faptul că vom avea foarte multe cereri către sistem, ce vor trebui rezolvate în același timp, este natural să urmăm o astfel de tactică. Nu în ultimul rând, concurența este ușor de modelat, și în funcție de mediul în care rulează serviciul poate implica paralelism, și de aceea am preferat-o fața de paralelismul clasic.
 
 \section{Stilul arhitectural}
 
-Pentru a putea îndeplini toate calitățile arhitecturale enumerate anterior, vom examina o suită de \textit{stiluri arhitecturale}, pentru a putea observa care dintre acestea este cel mai potrivit pentru un sistem de experimentare. În mod evident, stilurile arhitecturale de tipul \textit{data-flow} sau \textit{batch-processing} nu se pliază cerințelor sistemului, deoarece experimentele trebuie să poată fi adăugate sau șterse cu ușurință, oferind o velocitate de dezvoltare crescută. Este de remarcat faptul că un sistem de tipul client-server este cel mai indicat pentru a fi folosit în situația de față, având în vedere modul în care va fi utilizat serviciul. Cu toate acestea, după cum am menționat anterior, dorim să oferim posibilitatea clienților de a extinde foarte ușor sistemul de experimentare, pentru a-l particulariza conform cerințelor acestora. Acest lucru însă nu este trivial de realizat, mai ales în condițiile în care aplicație este dezvoltată sub forma unui \textit{monolit}.
+Pentru a putea îndeplini toate calitățile arhitecturale enumerate, vom examina o suită de \textit{stiluri arhitecturale}, pentru a le putea analiza și determina mai apoi care dintre acestea este cel mai potrivit pentru un sistem de experimentare. În mod evident, stilurile arhitecturale de tipul \textit{data-flow} sau \textit{batch-processing} nu se pliază cerințelor sistemului, deoarece experimentele trebuie să poată fi adăugate sau șterse cu ușurință, oferind o velocitate de dezvoltare crescută. Se remarcă imediat că un sistem de tipul client-server este cel mai indicat pentru a fi folosit în situația de față, având în vedere modul în care va fi utilizat serviciul. Cu toate acestea, după cum am precizat, dorim să oferim posibilitatea clienților de a extinde foarte ușor sistemul de experimentare, pentru a-l particulariza conform nevoilor acestora. Îndeplinirea unor astfel de cerințe nu este trivial de realizat, mai ales în condițiile în care aplicația este dezvoltată sub forma unui \textit{monolit}.
 
-Calitățile arhitecturale expuse, dar și scopul sistemului, ne îndrumă către o arhitectură bazată pe \textbf{servicii\textit{}}. In mod imediat, abordarea clasică pe care o putem urma este aceea de \textit{SOA}\footnote{Service Oriented Architecture - Arhitectură orientată pe servicii}. Acest tip de arhitectură are însă dezavantajul de a fi de complexă, iar în final modulele componente nu devin independente, ci \textit{autonome}. Orice aplicație de de tip \textit{SOA} este gestionată și distribuită asemeni unui \textit{monolit}. De aceea, lucrarea propune o abordare arhitecturală mai nouă, bazată pe \textbf{\textit{microservicii}}.\cite{buildingmicro} 
+\index{monolit}
+\begin{definition}
+	Un \textbf{monolit} este o aplicație unitară, ce este formată dintr-o singură componentă independentă de alte aplicații.
+\end{definition}
+
+\index{SOA}
+Calitățile arhitecturale expuse, dar și scopul sistemului, ne îndrumă către o arhitectură bazată pe \textbf{servicii\textit{}}. In mod imediat, abordarea clasică pe care o putem urma este aceea de \textit{SOA}\footnote{Service Oriented Architecture - Arhitectură orientată pe servicii}. Acest tip de arhitectură are însă dezavantajul de a fi complexă, iar în final modulele componente nu devin independente, ci \textit{autonome}. Orice aplicație de de tip \textit{SOA} este gestionată și distribuită asemeni unui \textit{monolit}. De aceea, lucrarea propune o abordare arhitecturală nouă, inovativă, bazată pe \textbf{\textit{microservicii}}.\cite{buildingmicro} 
 
 \subsection{Arhitectura bazată pe microservicii}
 
-Arhitecturile bazate pe \textit{microservicii} reprezintă un nou mod de abordare a aplicațiilor, care se diferențiază segmentarea fiecărui modul al aplicației într-un serviciu independent. Aceste servicii pot comunica prin intermediul unui mecanism ce presupune un \textit{overhead} minimal, iar de obicei acest mecanism folosit este protocolul HTTP\cite{onmicro}. Motivația principală ce stă la baza acestui tip de arhitectură constă în posibilitatea de a pune în producție fiecare dintre aceste servicii \textbf{independent} de celelalte, iar acest fapt rezultă într-o viteză crescută de dezvoltare.
+\index{microservicii}
+Arhitecturile bazate pe \textit{microservicii} reprezintă un nou mod de abordare a aplicațiilor, care se diferențiază segmentarea fiecărui modul al aplicației într-un serviciu independent. Aceste servicii pot comunica prin intermediul unui mecanism ce presupune un \textit{overhead} minimal, iar de obicei alegerea utilizată este protocolul HTTP\cite{onmicro}. Motivația principală ce stă la baza acestui tip de arhitectură constă în posibilitatea de a pune în producție fiecare dintre aceste servicii \textbf{independent} de celelalte, iar acest lucru implică o viteză crescută de dezvoltare.
 
+\index{microservicii}
 \begin{definition}
-	Un microserviciu reprezintă un proces, ce are un \textbf{scop singular}, și care comunică cu alte microservicii prin intermediul unui protocol bine definit.
+	\label{def:microservice}
+	Un microserviciu reprezintă un proces, cu un \textbf{scop singular}, ce rulează independent, și care comunică cu alte microservicii prin intermediul unui protocol bine definit.
 \end{definition}
 
-Unul din motivele pentru care microserviciile au reușit să fie adoptate de un număr relativ mare de companii, printre care menționăm \textit{Google}, \textit{Amazon} și \textit{Netflix}, într-un timp atât de scurt, se datorează apariției tehnologiilor noi precum \textit{Docker}, ce permit rularea unei aplicații în interiorul unui \textit{container}, complet izolat de restul aplicațiilor de pe aceeași mașină. Prin container înțelegem un strat de abstractizare, superior din punctul de vedere al performanței față de mașinile virtuale. Astfel un \textit{container} încapsulează toate dependențele necesare unei aplicații, dar împarte același \textit{kernel} al sistemului de operare cu restul containerelor. Putem rula în acest mod o serie întreagă de microservicii, fiecare în interiorul containerului său, independent de restul sistemului.
+Unul din motivele pentru care microserviciile au reușit să fie adoptate de un număr relativ mare de companii, printre care menționăm \textit{Google}, \textit{Amazon} și \textit{Netflix}, într-un timp atât de scurt, se datorează apariției tehnologiilor noi precum \textit{Docker}, ce permit rularea unei aplicații în interiorul unui \textit{container}, complet izolat de restul aplicațiilor de pe aceeași mașină. 
+
+\index{container}
+\begin{definition}
+	Prin \textbf{container} înțelegem un strat de abstractizare, superior din punctul de vedere al performanței față de mașinile virtuale, ce  încapsulează toate dependențele necesare unei aplicații, dar împarte același \textit{kernel} al sistemului de operare cu restul aplicațiilor.
+\end{definition}
+
+Cu ajutorul acestei tehnologii, putem rula în o serie întreagă de microservicii, fiecare în interiorul containerului său, independent de restul sistemului.
 
 \subsubsection{Avantaje}
 
-Spre deosebire de aplicațiile clasice, de tip monolit, astfel de aplicații distribuite au un avantaj foarte interesant, ce provine din faptul că fiecare serviciu component al său poate fi scris în orice limbaj de programare, atât timp cât poate efectua comunicarea cu restul serviciilor, prin intermediul protocolului ales. Ca o consecință naturală, acest fapt oferă o flexibilitate mult mai mare dezvoltatorilor, conferind libertatea de a alege mult mai ușor tehnologie potrivită, ce se pliază problemei particulare pe care dorește să o rezolve serviciul. Implicit, prin fragmentarea aplicației se pot efectua mult mai ușor și tranzițiile către alte tehnologii, lucru ce este foarte greu, sau de mult ori imposibil de efectuat în contextul unei aplicații monolotice. În cazul clasic, se folosește aceeași tehnologie pentru întregul sistem, un dezavantaj major.
+Spre deosebire de aplicațiile clasice, de tip monolit, astfel de aplicații distribuite au un avantaj foarte interesant, ce provine din faptul că fiecare serviciu component al său poate fi scris în orice limbaj de programare, atât timp cât poate efectua comunicarea cu restul serviciilor, prin intermediul protocolului ales. Ca o consecință naturală, se oferă o flexibilitate mult mai mare dezvoltatorilor, conferind libertatea de a alege mult mai ușor tehnologia potrivită, ce se pliază problemei particulare pe care dorește să o rezolve serviciul. Implicit, prin fragmentarea aplicației se pot efectua mult mai ușor tranzițiile către alte tehnologii, lucru ce este foarte greu, sau de mult ori imposibil de efectuat în contextul unei aplicații monolotice. În cazul clasic, se folosește aceeași tehnologie pentru întregul sistem, un dezavantaj major.
 
+\index{load-balancer}
 Un alt beneficiu este acela de a avea ușurința de scalare rapidă a unei platforme bazată pe microservicii. Se pot optimiza resursele folosite de către sistem, prin rularea a multiple instanțe ale unui serviciu, în spatele unui \textit{load-balancer}. Cum aplicațiile moderne rulează în \textit{cloud}, se pot adăuga sau elimina instanțe extrem de rapid, în mod programatic. Din nou se poate observa cum fracționarea sistemului conduce către o flexibilitate sporită, pe care o aplicație clasică nu o poate oferi. Posibilitatea de a scala doar componentele necesare reduc costul de rulare a aplicației.
 
 Compunerea serviciilor este un alt aspect interesant, ce este facilitat de acest tip de arhitectură. De exemplu, tot mai multe aplicații trebuie să ofere o experiența unitară, pe mai multe platforme, ce permite utilizatorilor să schimbe dispozitivul în mijlocul unei sesiuni de lucru. Prin segmentarea corectă a aplicației se vor putea compune serviciile pentru a reutiliza datele oferite de serviciile generale, în timp ce va exista posibilitatea de dezvoltare a unor instanțe specializate pentru tipuri particulare de platforme. 
 
-Nu în ultimul rând trebuie amintită viteza de dezvoltare și de punere în producție a sistemului, ce este cu mult superioară față de aplicațiile clasice, monolitice. După cum am prezentat anterior, fiecare serviciu este dezvoltat și lansat în mod independent fața de celelalte. Se oferă posibilitatea de a scala dezvoltarea aplicației prin descentralizarea acesteia. Fiecare serviciu nu va depinde de celelalte, iar acest fapt îmbunătățește efectele pe care le au diferite concepte. De exemplu integrarea continuă este mult mai ușor și sigur de folosit în același timp, deoarece pentru a lansa o componentă se vor efectua doar testele necesare acesteia. 
+Nu în ultimul rând trebuie amintită viteza de dezvoltare și de punere în producție a sistemului, ce este cu mult superioară față de aplicațiile clasice, monolitice. După cum am prezentat anterior, fiecare serviciu este dezvoltat și lansat în mod independent fața de restul. Se oferă posibilitatea de a scala dezvoltarea aplicației prin descentralizarea acesteia. Fiecare serviciu nu va depinde de celelalte, iar acest fapt îmbunătățește efectele pe care le au diferite concepte. De exemplu integrarea continuă este mult mai ușor și sigur de folosit în același timp, deoarece pentru a lansa o componentă se vor efectua doar testele necesare acesteia. 
 
 \subsubsection{Dezavantaje}
 
-Desigur, pe lângă avantajele evidente, menționate anterior, există și o serie de dezavantaje pe care arhitectura bazată pe microservicii le prezintă\cite{onmicro}. Primul dezavantaj evident este acela al complexitații necesare punerii în producție a fiecărui serviciu, în mod individual, și orchestarea tuturor serviciilor ca un ansamblu. Există însă o întreagă suită de servicii ce orchestrare ce vin în ajutorul dezvoltatorilor pentru a putea minimiza această complexitate, precum \textit{Kubernetes}, dezvoltată de \textit{Google}. Se permite astfel, prin introducerea unui strat de abstractizare a sistemului, gestionarea fluentă și corectă a întregului serviciu. \cite{kubernetes}
+Desigur, pe lângă avantajele evidente, menționate anterior, există o serie de dezavantaje pe care arhitectura bazată pe microservicii le prezintă\cite{onmicro}. Primul dezavantaj evident este acela al complexitații necesare punerii în producție a fiecărui serviciu, în mod individual, și orchestarea tuturor serviciilor ca un ansamblu. Există însă o întreagă suită de servicii de orchestrare ce vin în ajutorul dezvoltatorilor pentru a putea minimiza această complexitate, precum \index{Kubernetes} \textit{Kubernetes}, dezvoltată de \textit{Google}. Se permite astfel, prin introducerea unui strat de abstractizare a sistemului, gestionarea fluentă și corectă a întregului serviciu. \cite{kubernetes}
 
 De altfel, complexitatea crescută a sistemelor distribuite, de care un dezvoltatorii trebuie să țină cont, reprezintă un dezavantaj a arhitecturii bazate pe microservicii, în ceea ce privește ușurința de dezvoltare. 
 
-Deși împărțirea aplicației în microservicii duce la ușurarea procesului de testare a fiecărui serviciu, apare o altă problemă și anume aceea a efecutării testării \textit{end-to-end}, sau de integrare, a întregului sistem. 
+Deși împărțirea aplicației în microservicii duce la înlesnirea procesului de testare a fiecărui serviciu, apare o altă problemă și anume aceea a efecutării testării \textit{end-to-end}, sau de integrare, a întregului sistem. 
 
 \begin{remark}
 	O capcană pe care o prezintă arhitectura bazată pe microservicii este aceea a dezvoltării unui număr prea mare de microservicii, prea specializate, ce poartă numele de \textbf{nanoservicii}, iar această practică este descurajată.
@@ -80,7 +106,7 @@ Un ultim dezvatantaj, este reprezentat de durata de comunicare în rețea între
 
 \subsubsection{Concluzie}
 
-Deși prezintă o serie de dezavantaje, lucrarea consideră că stilul arhitectural bazat pe \textit{microservicii} se pliază cel mai bine pentru un sistem de experimentare. Flexibilitatea și extensibilitatea sporită ce sunt oferite de o astfel de arhitectură fața de cele tradiționale, recomandă acest stil arhitectural.
+Deși prezintă o serie de dezavantaje, lucrarea consideră că stilul arhitectural bazat pe \textit{microservicii} se pliază cel mai bine pentru un sistem de experimentare. Flexibilitatea și extensibilitatea sporită ce sunt oferite de o astfel de arhitectură, fața de cele tradiționale, recomandă acest stil arhitectural.
 
 \section{Principii arhitecturale}
 
@@ -88,11 +114,12 @@ Secțiunea anterioară a justificat motivele utilizării unei arhitecturi bazate
 
 \subsubsection{Servicii \textit{stateless}}
 
+\index{servicii stateless}
 Vom impune o regulă generală, și anume ca toate serviciile să fie considerate \textit{stateless}. Prin acest lucru înțelegem că acestea nu vor încapsula informații legate la starea aplicației. Astfel, în mod teoretic, scalarea serviciului pe orizontală se poate face prin simpla adăugare sau eliminare a mai unor instanțe ale acestuia. Aceast principiu, sugerează REST ca și protocol de comunicare între servicii, de altfel acesta fiind protocolul folosit cel mai des în acest tip de arhitectură\cite{buildingmicro}. 
 
 \subsubsection{Separarea datelor}
 
-Principiul separării datelor sugerează ca fiecare microserviciu să își gestioneze datele prin folosirea unei baze de date proprii. Astfel, fiecare serviciu va alege tipul de bază de date care este cel mai potrivit pentru acesta. De exemplu un serviciu ce permite operații CRUD \textit{(create, read, updated, delete)} va folosi un RDBMS \textit{(Relational Database Management System)}, în timp ce un serviciu de autenficare poate utiliza o bază de date No-SQL. 
+Principiul separării datelor sugerează ca fiecare microserviciu să își gestioneze datele prin folosirea unei baze de date proprii. De aceea, fiecare serviciu va alege tipul de bază de date care este cel mai potrivit pentru acesta. De exemplu un serviciu ce permite operații CRUD \textit{(create, read, updated, delete)} va folosi un RDBMS \textit{(Relational Database Management System)}, în timp ce un serviciu de autenficare poate utiliza o bază de date No-SQL. 
 
 Motivul principal pentru implementarea ideilor formulate de acest principiu, este acela că folosirea unei baze date date comune ar duce la dependențe între microservicii, provocate de folosirea comună a aceleași schema a bazei de date. Astfel, daca un serviciu solicită modificarea schemi, restul serviciilor care o folosesc vor trebui să fie actualizate, și astfel pierdem din flexibilitatea arhitecturii. Pe de altă parte există posibilitatea de a avea inconsistențe între diferitele baze de date. Pentru soluționarea acestei probleme există așa numitele unelte \textit{Master Data Management}. Acestea efectuează verificări periodice și oferă alerte administratorilor de sistem, și sincronizează bazele de date.
 
@@ -102,7 +129,7 @@ Motivul principal pentru implementarea ideilor formulate de acest principiu, est
 
 \subsubsection{Expunerea unui API}
 
-Din cauza faptului că arhitectura cu microservicii este foarte flexibilă, pot apărea dificultăți în gestionarea comunicării clientului cu sistemul. Fiecare apel trebuie să fie făcut către serviciul corespunzător. Gestionarea unor astfel de apeluri însă nu este recomandată să aibă loc pe partea de client.  Pentru acesta este ideală comunicarea simplă sub forma unui API\footnote{Application Programming Interface} comun, pentru întreaga aplicație. Soluționarea acestor probleme vine prin adăugarea unei alte componente și anume un \textit{API Gateway} sau un \textit{Reverse Proxy}. Clientul va face astfel mereu apelul către această componentă, care va ruta cererea mai departe serviciului corespunzător. Dezavantajul este acela că se adaugă complexitatea a încă unei componente la sistem, dar lucrarea consideră acest \textit{trade-off} benefic. 
+Din cauza faptului că arhitectura cu microservicii este foarte flexibilă, pot apărea dificultăți în gestionarea comunicării clientului cu sistemul. Fiecare apel trebuie să fie făcut către serviciul corespunzător. Gestionarea unor astfel de apeluri însă nu este recomandată să aibă loc pe partea de client.  Pentru acesta este ideală comunicarea simplă sub forma unui API\footnote{Application Programming Interface} comun, pentru întreaga aplicație. Soluționarea acestor probleme vine prin adăugarea unei alte componente și anume un \index{API Gateway}\textit{API Gateway} sau un \textit{Reverse Proxy}. Clientul va face astfel mereu apelul către această componentă, care va ruta cererea mai departe serviciului corespunzător. Dezavantajul este acela că se adaugă complexitatea a încă unei componente la sistem, dar lucrarea consideră acest \textit{trade-off} benefic. 
 
 \section{Dezvoltarea arhitecturii}
 
@@ -110,17 +137,17 @@ Din cauza faptului că arhitectura cu microservicii este foarte flexibilă, pot 
 
 \subsection{Identificarea serviciilor}
 
-Vom începe natural pentru arhitectura aleasă, indentificând componentele sistemului. După cum am descris anterior, clientul sistemului de experimentare dorește să poată gestiona rapid adăugarea și ștergerea experimentelor. Astfel, conform principiului de separare a datelor, putem identifica un prim microserviciu, acela de \textbf{\textit{Repository}}, sau \textit{Magazie} a experimentelor. Responsabilitatea acestei componente va fi gestionarea experimentelor, utilizând o bază de date proprie.
+Vom începe natural pentru arhitectura aleasă, indentificând componentele sistemului. După cum am descris anterior, clientul sistemului de experimentare dorește să poată gestiona rapid adăugarea și ștergerea experimentelor. Astfel, conform principiului de separare a datelor, putem identifica un prim microserviciu, acela de \index{Repository Service}\textbf{\textit{Repository}}, sau \textit{Magazie} a experimentelor. Responsabilitatea acestei componente va fi gestionarea experimentelor, utilizând o bază de date proprie.
 
-Pe lângă componenta identificată deja, este absolut necesar un mecanism de asignare a unei entități către un experiment. O primă idee, intuitivă, spune că putem avea o componentă care va interoga magazia experimentelor și efectua apoi toate sarcinile necesare. Dar, deoarece știm ca dorim să experimentăm, cu mai multe astfel de modalități de asignare a entităților către experimente, și dorim de asemenea ca și clientul aplicației să poată folosi orice abordare dorește, vom construi o componentă separată ce se va ocupa doar de acest aspect, pe care o vom numi \textit{\textbf{Assigner}}, sau \textbf{\textit{Serviciu de atribuire}}. Acest serviciu se va ocupa exclusiv de gestionarea apartenenței unei entități la unui grup din cadrul unui experiment descris.
+Pe lângă componenta identificată deja, este absolut necesar un mecanism de asignare a unei entități către un experiment. O primă idee, intuitivă, spune că putem avea o componentă care va interoga magazia experimentelor și efectua apoi toate sarcinile necesare. Dar, deoarece știm ca dorim să experimentăm, cu mai multe astfel de modalități de asignare a entităților către experimente, și dorim de asemenea ca și clientul aplicației să poată folosi orice abordare dorește, vom construi o componentă separată ce se va ocupa doar de acest aspect, pe care o vom numi \index{Assigner Service} \textit{\textbf{Assigner}}, sau \textbf{\textit{Serviciu de atribuire}}. Acest serviciu se va ocupa exclusiv de gestionarea apartenenței unei entități la unui grup din cadrul unui experiment descris.
 
-Ne amintim că, din perspectiva funcțională a clientului final, acesta dorește ca experiența sa să fie cât mai uniformă. Acestă doleanță se traduce prin asignarea, de fiecare dată, a unei entități către aceleași grupuri din anumite experimente. Efectul poate fi obținut prin construcția unui \textit{Assigner} ce este determinist. Dar, având în vedere că nu putem forța acest comporatament componentei respective, va trebui să construim o altă componentă, care să stocheze informații referitoare la asignarea inițială a unui utilizator, pe care o vom numi \textit{\textbf{Store}} sau \textbf{\textit{Depozit}}. Astfel, dacă o entitate a fost deja asignată unui grup, va trebui ca sistemul de experimentare să garanteze că a doua oară când va fi interogat, pentru aceeași entitate, va oferi același răspuns.
+Ne amintim că, din perspectiva funcțională a clientului final, acesta dorește ca experiența sa să fie cât mai uniformă. Acestă doleanță se traduce prin asignarea, de fiecare dată, a unei entități către aceleași grupuri din anumite experimente. Efectul poate fi obținut prin construcția unui \textit{Assigner} ce este determinist. Dar, având în vedere că nu putem forța acest comporatament componentei respective, va trebui să construim o altă componentă, care să stocheze informații referitoare la asignarea inițială a unui utilizator, pe care o vom numi \index{Store Service} \textit{\textbf{Store}} sau \textbf{\textit{Depozit}}. Astfel, dacă o entitate a fost deja asignată unui grup, va trebui ca sistemul de experimentare să garanteze că a doua oară când va fi interogat, pentru aceeași entitate, va oferi același răspuns.
 
 \begin{remark}
 	Dacă serviciul Assigner este determinist atunci nu este necesară existența serviciului Store. 
 \end{remark}
 
-Nu în ultimul rând, avem nevoie de un serviciu care să coordoneze si să orchestreze interacțiunile între cele trei servicii descrise, acesta fiind punctul ce va expune un \textit{API} pentru clientul aplicației. Vom denumi acest serviciu \textit{\textbf{Experimento}}, acesta luând numele framework-ului de experimente pe care lucrarea îl propune. 
+Nu în ultimul rând, avem nevoie de un serviciu care să coordoneze si să orchestreze interacțiunile între cele trei servicii descrise, acesta fiind punctul ce va expune un \textit{API} pentru clientul aplicației. Vom denumi acest serviciu \index{Experimento Service} \textit{\textbf{Experimento}}, acesta luând numele framework-ului de experimente pe care lucrarea îl propune. 
 
 Am indentificat deci 4 microservicii ce vor fi nelipisite din alcătuirea sistemului de bază. Le vom recapitula sumar, pentru a le putea vizualiza ușor.
 
@@ -135,8 +162,6 @@ Am indentificat deci 4 microservicii ce vor fi nelipisite din alcătuirea sistem
 	Serviciul \textit{Experimento} reprezintă componenta centrală a sistemului, iar dezvoltarea corectă a acestuia este critică. Lucrarea va oferi un exemplu de implementare concretă.
 \end{remark}
 
-
-
 \subsection{Descrierea mesajelor}
 
 Într-o arhiectură bazată pe microservicii este foarte importantă comunicarea ce se realizează între componente. Soluția naturală este aceea de a standardiza mesajele, și a comunica folosind un anumit format, bine definit, pentru a evita posibilele discrepanțe.
@@ -150,8 +175,6 @@ Deși există un număr mare de librării ce sunt folosite pentru serializarea �
 \end{remark}
 
 Mesajul principal ce va sta la baza sistemului de experimentarea este acela ce va descrie complet un experiment. Va trebui să încapsulăm informații referitoare la experiment, variabilele, și grupurile acestuia, dar și să oferim posibilitatea de a integra alte informații auxiliare. Lucrarea propune următoarea strucutră pentru un astfel de mesaj:
-
-\break
 
 \begin{center}
 	\begin{lstlisting}[language=proto3]
@@ -169,6 +192,8 @@ message Experiment {
 \end{center}
 
 Se identifică trei mesaje ce vor trebui definite: \textit{ExperimentInfo}, \textit{VariableInfo}, alături de \textit{GroupInfo}.
+
+\break
 
 \begin{center}
 	\begin{lstlisting}[language=proto3]
@@ -208,8 +233,6 @@ message GroupInfo {
 
 Câmpul \textit{Variables} asociează fiecărei variabile o anumită valoare pentru aceasta. Menționăm că trebuie efectuată verificarea în așa fel încât valoarea variabilei să fie validă, cu alte cuvinte să fie specificată anterior, în membrul \textit{options} al mesajului \textit{VariableInfo}, corespunzător grupului în cauză.
 
-\break
-
 \subsection{Definirea interfețelor}
 
 Fiecare din microserviiciile identificate a fost descris, din punct de vedere funcțional, ilustrând rolul și cerințele acestuia. \textit{Framework}-ul pe care lucrarea dorește să îl dezvolte, propune o implementarea concretă pentru micro-serviciul \textit{Experimento}, unică. Pentru restul de trei microservicii indentificate, le vom descrie sub forma unor interfețe. Vom dezvolta mai apoi o serie de implmenetări concrete pentru acestea, în capitolul corespunzător dezvoltării aplicației. În definierea metodelor, ne vom folosi de mesajele definite anterior, pentru a putea descriere interfețele într-un mod consistent.
@@ -239,6 +262,8 @@ type Repository interface {
 \subsubsection{Store}
 
 Cum microserviciul \textit{Store} este responsabil pentru a reține asignarea unei entități către un experiment, vom expune două metode ale interfeței, una pentru a seta alegerea inițiala și alta pentru a interoga existența unei astfel de alegeri. Acestea vor trebui să primească ca parametru identificatorul entintății, și identificatorul experimentului, iar cea de \textit{set}, pe lângă acestea va primi ca parametru și identificatorul grupului unde a fost asignată entitatea.
+
+\break
 
 \begin{center}
 	\begin{lstlisting}[language=proto3]
