@@ -10,9 +10,10 @@ Scopul final al unui sistem de experimentare este acela de a obține o viziune d
 
 Vom da un exemplu pentru a putea înțelege mai bine abordarea pe care o avem. Presupunem că avem un produs de comerț online, și există 3 grupuri: \textit{control}, \textit{test1} și \textit{test2}, iar metrica ce ne interesează este rata conversiilor în aplicația respectivă. Vom compara media ratei conversiilor pentru grupurile \textit{test1} și \textit{test2} cu media ratei conversiilor pentru grupul de control.
 
-\begin{remark}
+\begin{theorem}
+	\index{metrica}
 	Media unei metrici pentru o populație este distribuită normal, de medie ${\mu}$ și deviație standard $\frac{\sigma}{\sqrt{n}}$, unde $n$ reprezintă numărul observațiilor, conform \textbf{teoremei limită centrală}.
-\end{remark}
+\end{theorem}
 
 Prin convenție, în această secțiune ne vom referi doar la două grupuri, \textit{control} și \textit{test}, fără pierderea generalității, deoarece modul de comparare rămâne universal valabil.
 
@@ -22,11 +23,11 @@ Vom nota cu  $\mu_{control}$ și $\mu_{test}$, media metricei pentru \textit{\te
 
 \subsubsection{Testul Welsch \textit{t}}
 
-Pentru efectuarea comparației vom calcula intervalul de încredere pentru diferentă între $\mu_{control}$ șî $\mu_{test}$. Pentru acest lucru vom folosi testul statistic \textit{Welsch} \cite{Welch1947}. Testul \textit{Welch} este un test pentru două eșantioane, folosit pentru a testa ipoteza că aceastea au aceeași metrică. 
+Pentru efectuarea comparației vom calcula intervalul de încredere pentru diferentă între $\mu_{control}$ șî $\mu_{test}$. Pentru acest lucru vom folosi testul statistic \index{testul Welsch} \textit{Welsch} \cite{Welch1947}. Testul \textit{Welch} este un test pentru două eșantioane, folosit pentru a testa ipoteza că aceastea au aceeași metrică. 
 
-Testul \textit{Welch t}, este o adaptare a testului \textit{Student t}, acesta având la bază testul Student. Acesta este însă mult mai robust când cele două eșantioane au deviații standard diferite, dar și dimensiuni diferite. Acest tip de teste se efectuează de obicei în practică atunci cănd cele două eșantioane nu se suprapun, și astfel se pretează excelent pentru a fi folosit de către un sistem de experimentare. 
+Testul \textit{Welch t}, este o adaptare a testului \textit{Student t}, acesta având la bază testul Student. Reamintim cititorului că testul student este folosit pentru a determina dacă mediile a două populații sunt diferite. Testul Welch este însă mult mai robust când cele două eșantioane au deviații standard diferite, dar și dimensiuni diferite. Acest tip de teste se efectuează de obicei în practică când cele două eșantioane nu se suprapun, și de aceea se pretează excelent pentru a fi folosit de către un sistem de experimentare. 
 
-Vom descrie modul de calcul al testului, dar și cum putem calcula intervalul de încredere pentru diferența dintre media metricei între grupul de test și grupul de control.
+Vom expune modul de calcul al testului, dar și cum putem calcula intervalul de încredere pentru diferența dintre media metricei între grupul de test și grupul de control.
 
 Pentru a efectua testul statistic \textit{Welsch}, va trebui să calculăm statistica \textit{t}\cite{Welch1947}, astfel:
 
@@ -39,8 +40,9 @@ Pentru a efectua testul statistic \textit{Welsch}, va trebui să calculăm stati
 
 \vspace{0.8cm}
 
-Pentru a determina gradele de libertate vom folosi o ecuație pentru aproximarea acestora, ce poartă numele de ecuația \textit{Welch–Satterthwaite}\cite{Welch1947}. Astfel, $\nu$ se aproximează astfel:
+Pentru a determina gradele de libertate vom folosi o ecuație pentru aproximarea acestora, ce poartă numele de ecuația \index{Welch–Satterthwaite}\textit{Welch–Satterthwaite}\cite{Welch1947}. Astfel, $\nu$ se aproximează astfel:
 
+\index{grade de libertate}
 \begin{equation}
 \label{vapprox}
 \nu = \frac{({\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}}) ^ 2}{
@@ -93,6 +95,7 @@ Presupunem că există $n$ grupuri în experimentul nostru, și dorim să maximi
 Fie momentul $t$ ce va reprezenta asignarea a celei de-a $t$ entități către un grup. Vom nota cu $r_t$ valoarea metricei obținută prin asignarea efectuată..
 
 \begin{definition}
+\index{regret}
 \label{regret}
 Vom defini regretul, în mod normal cu următoarea formulă: 
 \[
@@ -101,6 +104,7 @@ Vom defini regretul, în mod normal cu următoarea formulă:
 \end{definition}
 
 \begin{definition}
+\index{regretul mediu}
 \label{regretaverage}
 	Vom defini regretul mediu, pe care îl vom nota cu $\overline{\rho}$ astfel:
 	\[
@@ -108,11 +112,16 @@ Vom defini regretul, în mod normal cu următoarea formulă:
 	\]
 \end{definition}
 
+\begin{remark}
+	Regretul mediu cuantifică media regretului la fiecare iterație.
+\end{remark}
+
 \begin{definition}
 	O strategie se va numi optimă dacă $\rho$, regretul asociat, este 0 la oricare moment de timp $t$.
 \end{definition}
 
 \begin{definition}
+\index{zero-regret}
 	O strategie se va numi strategie "zero-regret", dacă valoarea medie a regretului, $\overline{\rho}$ tinde către 0 cu probabilite 1, atunci când $t \to \infty$.
 \end{definition}
 
@@ -123,7 +132,8 @@ Vom defini regretul, în mod normal cu următoarea formulă:
 În literatură au fost descrise un număr larg de diferite strategii de selecție ce au ca scop minimizarea regretului. Cu toate acestea, pentru un sistem de experimentare există o altă metrică care este foarte importantă. Presupunem că există două grupuri pentru care valoarea medie a metricei pentru populația acestora este $\mu_1 \neq \mu_2$.
 
 \begin{definition}
-	Vom nota cu $T_{\alpha}^*$ numărul de asignări după care am obținut rezultate semnificative din punct de vedere statistic, cu încredere $\alpha$, că mediile celor două grupuri sunt diferite. Vom denumi această metrică pe care lucrarea o propune, \textbf{timpul de convergență}.
+	\index{timp de convergență}
+	Vom nota cu $T_{\alpha}^*$ numărul de asignări după care am obținut rezultate semnificative din punct de vedere statistic, cu încredere $\alpha$, că mediile celor două grupuri sunt diferite. Vom denumi această metrică pe care lucrarea o propune, \textbf{timpul de convergență}, sau durata de convergență.
 \end{definition}
 
 \section{Testare A/B}
@@ -131,6 +141,7 @@ Vom defini regretul, în mod normal cu următoarea formulă:
 Există mai multe metode de experimentare, dar care cea mai uzitată în industria informatică este de departe aceea a testării \textit{A/B}, ea fiind folosită în mod constant de companii precum \textit{Google}, \textit{Facebook}, sau \textit{Amazon}. 
 
 \begin{definition}
+	\index{testare A/B}
 	\textbf{Testarea A/B} este o formă de testare a ipotezelor statistice, ce implică existența a două grupuri, unul de control și unul de test, iar între acestea două diferă valoarea unei singure variabile.
 \end{definition}
 
@@ -186,6 +197,7 @@ De aceea, după cum am menționat, asignând fiecărui grup o pondere egală, se
 
 \section{Testare 'Multi-armed bandit'}
 
+\index{multi-armed bandit}
 Metoda de experimentarea pe care urmează să o prezentăm are ca inspirație problema probabilistică a banditului cu mai multe brațe, ce este tratată cu interes în mai multe lucrări de specialitate. În această problemă, un parior are în fața sa o serie de mașini electronice de jocuri de noroc. Acesta trebuie să decidă de câte ori să joace fiecare mașină și în ce ordine, astfel încât ascesta sa maximize potențialul câștig printr-o secventă de trageri de manetă. 
 
 Se observă astfel o analogie cu problema ce presupune asignarea unor entități în anumite grupuri de experimentare. Astfel, putem reformula problema pentru a căuta o strategie optimă de asignare a entităților astfel încât să maximizăm efectele pozitive cutantificate prin prisma unei metrice, fiind echivalent cu minimizarea regretului definit anterior. De altfel, această metodă a fost folosită în studiile clinice pentru a minimiza pierderile asupra pacienților.
@@ -197,8 +209,10 @@ Există un număr de soluții \textit{aproximative}, iar lucrarea le va aminti p
 
 Vom descrie o serie de strategii semi-uniforme ce sunt bazate pe aceeași idee centrală, dar diferă prin detaliile de implementare. Se identifică două faze centrale, \textit{faza de explorare} și \textit{faza de exploatare}.
 
+\index{faza de explorare}
 \textbf{Faza de explorare} este o simulare cu abordarea propusă de testarea A/B. De altfel, numele acesteia provine din scopul ei de a aduna date referitoare la performanța fiecărui grup.
 
+\index{faza de exploatare}
 \textbf{Faza de exploatare} propune folosirea unor cunostințe acumulate din faza de explorare pentru a asigna entitățile către experimente într-un mod mai inteligent. Pentru strategiile următoare faza de explorare va consta în asignarea tuturor entităților către grupul cu cea mai bună performanță în faza de explorare.
 
 \begin{itemize}
@@ -218,18 +232,18 @@ Motivația ce a condus la dezvoltarea acestei idei este aceea că prin păstrare
 
 \section{Analiza strategiilor}
 
-În secțiunea de fața vom analiza toate strategiile, enumerate anterior, cuantificând metricele de regret, și timpul de convergență. Vom putea să determinăm astfel cât de eficiente sunt fiecare din aceste strategii: \textit{testare A/B}, \textit{Epsilon-Greedy}, \textit{Bayesian Bandit} și strategia hibridă propusă de lucrare, pe car eo vom numi \textit{Hybrid Bandit}. 
+În secțiunea de fața vom analiza toate strategiile enumerate anterior, cuantificând metricele de regret, și timpul de convergență. Vom putea să determinăm astfel cât de eficiente sunt fiecare din aceste strategii: \textit{testare A/B}, \textit{Epsilon-Greedy}, \textit{Bayesian Bandit} și strategia hibridă propusă de lucrare, pe car eo vom numi \textit{Hybrid Bandit}. 
 
-Vom presupune că vom avea de efectuat un experiment în care variem o singură valoare a unei variabile. De asemenea putem presupune, fără pierderea generalității că vom avea doar două grupuri, unul de control și unul de test. Am ales un astfel de cadrul simplist pentru analiză, deoarece acesta este cel mai des folosit în practică, și permite cititorului să își formeze o viziune de ansamblu asupra metodelor mai rapid. 
+Vom presupune că vom avea de efectuat un experiment în care variem o singură valoare a unei variabile. De asemenea putem presupune, fără pierderea generalității că vom avea doar două grupuri, unul de control și unul de test. Am ales un astfel de cadrul simplificat pentru analiză, deoarece acesta este cel mai des folosit în practică, și permite cititorului să își formeze o viziune de ansamblu asupra metodelor utilizate. Folosind concluziile obținute într-un astfel de mediu se poate formula ușor o generalizare completă.
 
-Ne amintim că am definit în ecuația \ref{interval} modlitate a afla intervalul de încredere corespunzător diferenței mediilor a două metrice. Pentru compararea diferitelor metode de asignare a entităților va trebui să comparăm durata de convergența și regretul. Folosind relațiile definite la începutul acestui capitol, putem să determinăm numărul mediu minim de iterații necesare, după care testul va converge și vom fi obținut rezultate semnificative din punct de vedere statistic. 
+Ne amintim că am definit în ecuația \ref{interval} modalitatea de a afla intervalul de încredere corespunzător diferenței mediilor a două metrice. Pentru compararea diferitelor metode de asignare a entităților va trebui să comparăm durata de convergența și regretul. Folosind relațiile definite la începutul acestui capitol, putem să determinăm numărul mediu minim de iterații necesare, după care testul va converge și vom fi obținut rezultate semnificative din punct de vedere statistic. 
 
-Presupunem că știm mediile \textit{populației}, dar și deviațiile standard ale acestora, $\mu_{control}, mu_{test}$ respectiv $s_{control}, s_{test}$, pentru metricele monitorizate.
+Presupunem că știm mediile \textit{populației}, dar și deviațiile standard ale acestora, $\mu_{control}, \mu_{test}$ respectiv $s_{control}, s_{test}$, pentru metricele monitorizate.
 
-\begin{remark}
+\begin{theorem}
 	\label{widthobs}
 	Dacă dimensiunea intervalului de încredere este mai mică decât diferența $|\mu_{control} - \mu_{test}|$, atunci testul va respinge ipoteza nulă, și va accepta ipoteza alternativă conform căreia cele două medii sunt diferite.
-\end{remark}
+\end{theorem}
 
 Din ecuația \ref{interval} deducem următoarea formulă: 
 
@@ -238,13 +252,13 @@ Din ecuația \ref{interval} deducem următoarea formulă:
 D =  t_{1 - \alpha, \nu} \sqrt{ {\frac{s_{test}^2}{N_{test}} }+ {\frac{s_{control}^2}{N_{control}}}}
 \end{equation}
 
-\begin{remark}
+\begin{theorem}
 	Se va folosi $ t_{1 - \alpha, \nu}$ și nu $ t_{1 - \alpha/2, \nu}$ pentru determinarea lungimii intervalului de încredere.
-\end{remark}
+\end{theorem}
 
 Considerând că din grupul de control vor face parte $\alpha N, \alpha \in (0, 1)$ entități, iar din grupul de test $\beta N, \beta \in (0, 1)$, unde $\alpha + \beta = 1$ și unde am notat $N = N_{test} + N_{control}$, vom putea rescrie ecuația \ref{width} astfel încât să determinăm numărul de iterații necesare minime, pentru a obține rezultate semnificative din punct de vedere statistic.
 
-\begin{remark}
+\begin{theorem}
 	Putem determina valoarea medie a timpului de convergență cu ajutorul formulei:
 \label{requiredsample}
 \[
@@ -254,7 +268,7 @@ N =  \frac{
 	D^2 \alpha \beta
 	}
 \]
-\end{remark}
+\end{theorem}
 
 \begin{proof}
 	Vom pleca de la ecuația \ref{width}:
@@ -309,14 +323,14 @@ Pentru a efectua o comparație obiectivă, ne vom folosi de valoarea medie a reg
 	\overline{\rho} = \mu^* - (\alpha \mu_{control}  +  \beta  \mu_{test})
 \end{equation}
 
-\begin{remark}
+\begin{theorem}
 \label{particularaverageregret}
 	Dacă presupunem $\mu_{test} > \mu_{control}$, fără pierderea generalității, putem scrie formula regretului mediu astfel:
 	
 	\[
 		\overline{\rho} = \beta (\mu_{test} - \mu_{control})
 	\]
-\end{remark}
+\end{theorem}
 
 \begin{proof}
 	
@@ -335,13 +349,13 @@ Pentru a efectua o comparație obiectivă, ne vom folosi de valoarea medie a reg
 
 \subsection{Rezultate}
 
-Folosind rezultatele postulate de observațiile \ref{requiredsample}  și \ref{particularaverageregret}, vom construi o serie de grafice ajutătoare pentru a putea compara toate modalitațile descrise. Acestea ne vor ajuta să identificăm vizual avantajele și dezavantajale fiecăreia, și ne va permite să concluzionăm mai apoi asupra celei mai potrivite strategii.
+Folosind rezultatele postulate de observațiile \ref{requiredsample}  și \ref{particularaverageregret}, vom construi o serie de grafice ajutătoare pentru a putea compara toate abordările descrise. Acestea ne vor ajuta să identificăm vizual avantajele și dezavantajale fiecăreia, și ne vor permite să concluzionăm mai apoi asupra celei mai potrivite strategii.
 
-Atât pentru regret, cât și pentru timpul de convergență, vom utiliza grafice de tipul \textit{heatmap}\footnote{Diagramă colorată cu intensități diferite, în funcție de valoarea funcției}. Oe axa \textit{oy} vom reprezenta valoareaa medie a metricei în grupul de test, în timp ce axa \textit{oy} va corespunde valorii medie a metricei pentru entitățile de control. De asemenea, vom folosi o reprezentare ce poartă numele de \textit{hexbin}, pentru a putea aggrega o serie de valori, sub forma mediei, ce se află în vecinătatea unui punct central.
+Atât pentru regret, cât și pentru timpul de convergență, vom utiliza grafice de tipul \textit{heatmap}\footnote{Diagramă colorată cu intensități diferite, în funcție de valoarea funcției}. Pe axa \textit{oy} vom reprezenta valoarea medie a metricei în grupul de test, în timp ce axa \textit{ox} va corespunde valorii medie a metricei pentru entitățile de control. De asemenea, vom folosi o reprezentare ce poartă numele de \textit{hexbin}, pentru a putea aggrega o serie de valori, sub forma mediei, ce se află în vecinătatea unui punct central.
 
 \subsubsection{Testarea A/B}
 
-În contextul definit anterior, vom avea dimiensiunile celor două grupuri egale, de dimensiune$1/2$, și vom obține un regret mediu dat de formula:
+În contextul definit anterior, vom avea dimiensiunile celor două grupuri egale, $1/2$, și vom obține un regret mediu dat de formula:
 
 \[
 	\overline{\rho}_{ab} = \frac{1}{2} * (\mu_{text} - \mu_{control})
@@ -363,7 +377,7 @@ Se poate vizualiza foarte ușor modul în care funcționează regretul, dar și 
 	\label{fig:ab_evaluation}
 \end{figure}
 
-Se observă cum, atunci când cele două grupuri au valori ale metricelor cât mai apropiate, este necesar un număr mai mare de iterații pentru a putea determina din punct de vedere statistic că acestea sunt diferite. Pe de altă parte, datorită naturii statice a metodei de testare A/B, cu cât diferența dintre metrice este mai mare, cu atât se obține un regret mediu mai mare.
+Se observă cum, atunci când cele două grupuri au valori ale metricelor cât mai apropiate, este necesar un număr mai mare de iterații pentru a putea determina din punct de vedere statistic că acestea sunt diferite. Pe de altă parte, datorită naturii statice a metodei de testare A/B, cu cât diferența dintre metrice este mai mare, se observă o corelație directă pozitivă cu regretul mediu.
 
 \subsubsection{Greedy Epsilon}
 
@@ -371,7 +385,7 @@ Conform acestei strategii, regretul mediu va converge către următoarea formul�
 	\overline{\rho}_{\epsilon} = \frac{1}{2} \epsilon * (\mu_{text} - \mu_{control}) 
 \]
 
-Ținând cont de formula prezentată mai sus pentru regretul mediu al abordării testării A/B, se poate observa că obținem un factor de îmbunătățire egal cu $\frac{1}{\epsilon}$. Astfel, pentru $\epsilon = 0.1$ vom avea un regret mediu de 10 ori mai mic, iar acest fapt reprezintă un mare avantaj pentru strategia de tip \textit{Greedy-Epsilon}. Pe de altă parte, vom examina diferențele în ceea ce privește timpii de convergența ai acestei strategii față de testarea A/B.
+Ținând cont de formula prezentată mai sus pentru regretul mediu al abordării testării A/B, se poate observa că obținem un factor de îmbunătățire egal cu $\frac{1}{\epsilon}$. Astfel, pentru $\epsilon = 0.1$ vom avea un regret mediu de 10 ori mai mic, iar acest fapt reprezintă un avantaj major pentru strategia de tip \textit{Greedy-Epsilon}. Pe de altă parte, vom examina diferențele în ceea ce privește timpii de convergența ai acestei strategii față de testarea A/B.
 
 \begin{figure}[H]
 	\centering
@@ -386,7 +400,7 @@ Conform acestei strategii, regretul mediu va converge către următoarea formul�
 	Vom folosi mediana și nu media pentru comparații pentru a putea evita efectul produse de \textit{outliere}\footnote{Valori ce sunt cu mult diferite de restul distribuției}
 \end{remark}
 
-De aceea, lucrarea sugerează folosirea, în general, a testării A/B, înaintea strategiilor de tipul \textit{Greedy Epsilon}.
+Cum un experiment se efectuează oricum pe o parte din utilizatorii aplicației, lucrarea sugerează folosirea, în general, a testării A/B, înaintea strategiilor de tipul \textit{Greedy Epsilon}.
 
 \subsubsection{Bayesian Bandit}
 
@@ -396,9 +410,9 @@ Reamintim că acest tip de strategie folosește informațiile \textit{a priori} 
 \overline{\rho}_{bayesian} = \frac{\mu_{control}}{\mu_{control} + \mu_{test}} * (\mu_{text} - \mu_{control})
 \]
 
-\begin{remark}
+\begin{theorem}
 	Regretul mediu pentru această strategie este întotdeauna mai mic decât regretul mediu pentru testarea A/B, $\overline{\rho}_{bayesian} < \overline{\rho}_{ab}$.
-\end{remark}
+\end{theorem}
 
 
 \begin{proof}
@@ -429,11 +443,11 @@ Cum am presupus fără pierderea generalității că $\mu_{test} > \mu_{control}
 	\label{fig:ab_vs_bayesian}
 \end{figure}
 
-Se poate observa în figura \ref{fig:ab_vs_bayesian}, optimizarea regretului. De altfel, mediana indică o optimizare cu \textit{33\%} a regretului. Pe de altă parte, numărul de iterații necesare pentru a obține convergența crește seminifcativ doar pentru așa numitele \textit{edge-cases}, în care diferența între cele două grupuri este considerabilă. Mediana indică o creștere doar de \textit{0.06} ori a numărului de iterații necesar. Așadar, lucrarea propune utilizarea strategiei \textbf{Bayesian Bandit}, în detrimentul testării A/B.
+Se poate observa în figura \ref{fig:ab_vs_bayesian}, optimizarea regretului ce are loc cu ajutorul acestei abordări. De altfel, mediana indică o optimizare cu \textit{33\%} a regretului. Pe de altă parte, numărul de iterații necesare pentru a obține convergența crește seminifcativ, însă doar pentru așa numitele \textit{edge-cases}, în care diferența între cele două grupuri este considerabilă. Mediana indică o creștere doar de \textit{0.06} ori a numărului de iterații necesar. Așadar, lucrarea propune utilizarea strategiei \textbf{Bayesian Bandit}, în detrimentul testării A/B.
 
 \subsubsection{Hybrid Bandit}
 
-Aceasta este abordarea alternativă pe care o propune lucrarea, și are ca scop eliminarea creșterii foarte mari a duratei de convergență pentru \textit{edge-cases}, păstrând în același timp avantajele aduse de abordarea descrisă sub numele de \textit{Bayesian Bandit}. Formula regretului este una mai complicată, dar care poate fi scrisă elegant ca o relație liniară între cele trei formule determinate anterior, astfel:
+Aceasta este abordarea alternativă, originală, pe care o propune lucrarea, și are ca scop eliminarea creșterii foarte mari a duratei de convergență pentru \textit{edge-cases}, păstrând în același timp avantajele aduse de abordarea descrisă sub numele de \textit{Bayesian Bandit}. Formula regretului este una mai complicată, dar care poate fi scrisă elegant ca o relație liniară între cele trei formule determinate anterior, astfel:
 
 \[
 \overline{\rho}_{hybrid} = \alpha * \overline{\rho}_{ab}  + \beta * \overline{\rho}_{\epsilon} + (1 - (\alpha + beta)) * \overline{\rho}_{bayesian} 
@@ -461,6 +475,6 @@ Se poate observa în figura \ref{fig:hybrid_vs_bayesian} că, deși avem un regr
 
 Deși reprezintă un mecanism rudimentar, testarea A/B se comportă surprinzător de bine. Strategia de tip \textit{Greedy Epsilon} este una defectuoasă, cu o serie întreagă de lacune. \textit{Bayesian Bandit} reprezintă o abordare ingenioasă, ce se comportă mai bine decât testarea A/B în general, dar are probleme atunci când diferențele metricelor între cele două grupuri sunt foarte mari, din punctul de vedere al iterației de dezvoltare. 
 
-În final, abordarea hibdridă, propusa de lucrare, prezintă un mecanism simplu, inegnios, și eficient în același timp, construind peste strategia descrisă de \textit{Bayesian Bandit}, adresând problemele pe \textit{edge cases}. De aceea, lucrarea propune această metodă ca o alternativă general viabilă și validă, față de cele descrise în literatură.
+În final, abordarea hibdridă, propusa de lucrare, prezintă un mecanism simplu, inegnios, și eficient în același timp, construind peste strategia descrisă de \textit{Bayesian Bandit}, adresând problemele legate \textit{edge cases}. De aceea, lucrarea consideră această metodă ca o alternativă general viabilă și validă, față de cele descrise în literatură.
 
 

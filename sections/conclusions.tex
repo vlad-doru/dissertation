@@ -1,5 +1,52 @@
-\chapter{Aplicații și concluzii}
+\chapter{Aplicație demonstrativă}
 
-În cele ce urmează vom descrise tehnologiile folosite și modalitatea de implementare a ideilor ce au fost expuse de această lucrare, pentru a construi un seriviciu de experimentare \textit{open-source}.
+În cele ce urmează vom descrise tehnologiile folosite și modalitatea de implementare a ideilor ce au fost expuse de această lucrare, pentru a construi un serviciu de experimentare \textit{open-source}.Vom oferi astfel un sistem care va funcționa \textit{out-of-the-box}, și ne va permite să vedem modul în care se efectuează experimentarea în interiorul unei aplicații. 
 
-\section{Aplicații practice}
+
+\section{Tehnologii folosite}
+
+Cel mai important aspect cu privire la tehnologiile folosite constă în alegerea mecanismului de comunicare între microservicii. Pe lângă microserviciile descrise, va apărea în plus un altul care va oferi clienților sistemului posibilitatea de gestiune a experimentelor, dar și de observarea a rezultatelor, prin intermediul unei interfețe web. Rolul acestuia este de a fi \textit{user-friendly}. În acest capitol nu vom insista asupra acestei componente, și a modului de dezvoltare a acesteia, deoarece ea nu reprezintă un obiectiv central al lucrării.
+
+\subsection{Standardizarea mesajelor}
+
+Necesitatea unui mod standardizat, rapid,cu implementări în mai multe limbaje de programare ne-a îndrumat către utilizarea frameworku-ului \index{Protocol Buffer}\textit{Protocol Buffers}. Cea de-a treia versiune a sintaxei, \textit{proto 3}, oferă o flexibilitate foarte mare, și de altfel, lucrarea a prezentat mesajele folosite pentru comunicare utilizând această tehnologie. Ea ne oferă o performanța foarte bună, fiind un protocol binar, dar pe lângă acest fapt dă posibilitatea de a transforma mesajele și a le codifica ca \textit{JSON}\footnote{JavaScript Object Notation}. Nu în ultimul rând, se oferă posibilitatea de a extinde mesajele primitive foarte ușor, iar acest fapt reprezintă un plus major pentru flexibilitate și adaptabilitatea sistemului. Pentru toate motivele expuse, vom implementa mecanismul de comunicare folosind această metodă de serializare. 
+
+\subsection{Mecanismul de comunicare}
+
+Folosind la bază \textit{Protocol Buffers}, putem utiliza mecanismul de \textit{RPC}\footnote{Remote Procedure Call} pentru a implementa comunicările între microservicii. Acesta are avantajul de a fi foarte rapid, utilizând un protocol de transmitere binar, și de a putea fi integrat foarte ușor cu librăria de serializare. De asemenea, oferă implemențari pentru \textit{client} și \textit{server} într-o gamă largă de limbaje de programare, în care sunt incluse cele mai folosite \textit{Go, C++, Python, Java, etc.}. Conexiunile multiple sunt multiplexate pe același canal de comunicare, iar acest fapt facilitează o viteză mai bună de transmitere a datelor pe rețea.
+
+\subsection{Limbajul de programare}
+
+Deși putem scrie fiecare serviciu într-un limbaj de programare diferit, lucrarea va expune o aplicație demonstrativă utilizând limbajul de programare \textit{Go}. Limbajul Go. Cunoscut și sub numele de Golang este un limbaj de programare modern, dezvoltat în anul 2007, în cadrul companiei Google. Cu toate acestea el este un limbaj open-source. Deși este un limbaj nou în cadrul industriei informatice, el se bucura de o rata de adopție din ce în ce mai mare, fiind deja utilizat în cadrul unor
+proiecte mari ce apartin unor companii precum Google, Soundcloud sau Heroku.
+
+Go reprezintă poate cea mai bună soluție existenta la
+momentul scrierii lucrării pentru un sistem de experimentare. El este un limbaj compilat, iar compilatorul acestuia este unul din cele mai rapide existente în industria
+software în ceea ce priveste timpul de producere a executabilului. Acesta a fost unul din scopurile principale ale limbajului înca din faza incipienta a dezvoltarii acestuia, pentru a putea permite dezvoltarea rapida a produselor în Go. Deoarece beneficiaza de compilare, performanța limbajului este una remarcabila si se apropie de cea a programelor scrise în C, oferind însă dezvoltatorului o serie de mecanisme modern în ceea ce privește sintaxa, pentru a putea îmbunătăți productivitatea, precum sistem static de tipuri cu un mecanism de inferare automată și garbage collection. 
+
+
+Trebuie mentionat ca limbajul de programare Go acorda o importanta deosebită concurenței. Având în vedere ca în aplicatiile moderne acest aspect joaca un rol crucial,
+Golang vine în întâmpinarea programatorului cu o paradigmă de programare, inspirată de \textit{CSP}\cite{hoare_csp}, ce permite
+dezvoltarea de aplicatii concurente cu o mare usurinta. Se introduce astfel conceptul de gorutină
+ce reprezinta o notiune analoaga cu threadurile. Diferența între cei doi termeni constă în modalitatea de comunicare ce se face prin interemediul canalelor sincronizate. De asemenea, Golang gestionează automat go-rutinele si le mapeaza pe un set de threaduri.
+
+Ecosistemul limbajului este unul spectaculos, ținând cont de vârsta frageda a acestuia. Există foarte multe librarii ce vin împreuna cu limbajul si rezolva o serie de probleme
+ce apar frecvent precum serializarea si deserializarea datelor, cât si constructia serverelor web. Tocmai pentru a impulsiona dezvoltarea de librarii open-source, Go propune o structura a proiectelor croita pentru acest tip de produse.
+
+În concluzie, datorită avantajelor expuse, vom utiliza acest limbaj pentru dezvoltarea aplicației demonstrative.
+
+\subsection{Orchestrarea serviciilor}
+
+Nu în ultimul rând este important modul în care vom orchestra serviciile. De aceea, aplicația demonstrativă va utiliza un framework ce poartă numele de \textit{Kubernetes} care oferă posibilitatea de abstractizare și gestionare foarte ușoară a unui sistem bazat pe microservicii. Folosirea acestei tehnologii implică de asemenea utilizarea \textit{Docker} pentru a rula fiecare microserviciu în cadrul unui container. 
+
+Menționăm faptul ca \textit{Kubernetes} poate multiplexa un număr mare de servicii pe resurse limitate, oferind astfel oportunitatea de a scala foarte ușor un întreg sistem.
+
+\chapter{Concluzii}
+
+În aceastc captiol vom expune concluziile obținute pe parcursul procesului de cercetare legat de problema construcției unui sistem de experimentare modern. Vom evidenția elementele de originalitate pe care lucrarea le-a propus, alături de rezultatele obținute. 
+
+Prin intermediul descrierii arhitecturii dar și a principiilor folosite, lucrarea a reușit să găsească un compromis optim în ceea ce privește flexibilitate, adaptabilitatea, scalarea și simplitatea unui astfel de serviciu. Una din cele mai importante aspecte ale lucrării este abstractizarea completă și elegantă, unică în literatură. Descrierea unor mesaje primitive are rolul de a standardiza modul de comunicare și de a oferi posibilitatea oricui de extindere a serviciului.
+
+Nu în ultimul rând, cu ajutorul cercetării efectuate, legate de modul de determinate a grupurilor în cadrul unui experiment, lucrarea a reușit să ofere o alternativă, robustă și performantă, dar nu în ultimul rând orignală, pentru efectuarea a experimentelor de ordin general. Cu ajutorul utilizării teoriei statistice, și definirea unor noi metrice, au putut fi efectuate comparații obiective, ce au dus la o serie de concluzii valoroase.
+
+În concluzie, lucrarea a reușit să își atingă scopul propus inițial, și să ofere bazele teoretice, alături de o implementare practică, a unui sistem de experimentare flexibil, scalabil și robust.
