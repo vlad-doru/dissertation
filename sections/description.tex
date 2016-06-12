@@ -17,7 +17,7 @@ Părțile implicate, sau \textit{stakeholderii} cum mai sunt denumite acestea î
 
 Având părțile implicate definite, vom trece mai departe să conturăm perspectiva funcțională a fiecăreia dintre acestea.
 
-\textbf{\textit{Clientul sistemului}} va dori să poată să gestioneze lista experimentelor, prin adăugarea și ștergerea lor, și să poată vizualiza lista cu cele disponibile. Va putea de asemenea să definească valorile variabilelor din cadrul unui experiment. Pe lângă aceste aspecte esențiale, în codul aplicației principale va dori să se efectueze un apel, având ca parametrii identificatorul experimentului și identificatorul entității, iși să obțină astfel toți parameterii variabilelor, \textit{pentru toate experimentele} în care entitatea respectivă se va regăsi.
+\textbf{\textit{Clientul sistemului}} va dori să poată gestiona lista experimentelor, prin adăugarea și ștergerea lor, și să poată vizualiza lista cu cele disponibile. Va putea de asemenea să definească valorile variabilelor din cadrul unui experiment. Pe lângă aceste aspecte esențiale, în codul aplicației principale va dori să fie efectuat un apel, având ca parametrii identificatorul experimentului și identificatorul entității, dorind să obțină toți parameterii variabilelor, \textit{pentru toate experimentele} în care entitatea respectivă se va regăsi.
 
 \index{imutabilitatea experimentului}
 \begin{remark}
@@ -62,7 +62,7 @@ Calitățile arhitecturale expuse, dar și scopul sistemului, ne îndrumă cătr
 \subsection{Arhitectura bazată pe microservicii}
 
 \index{microservicii}
-Arhitecturile bazate pe \textit{microservicii} reprezintă un nou mod de abordare a aplicațiilor, care se diferențiază segmentarea fiecărui modul al aplicației într-un serviciu independent. Aceste servicii pot comunica prin intermediul unui mecanism ce presupune un \textit{overhead} minimal, iar de obicei alegerea utilizată este protocolul HTTP\cite{onmicro}. Motivația principală ce stă la baza acestui tip de arhitectură constă în posibilitatea de a pune în producție fiecare dintre aceste servicii \textbf{independent} de celelalte, iar acest lucru implică o viteză crescută de dezvoltare.
+Arhitecturile bazate pe \textit{microservicii} reprezintă un nou mod de abordare a aplicațiilor, care se diferențiază prin segmentarea fiecărui modul al aplicației într-un serviciu independent. Aceste servicii pot comunica prin intermediul unui mecanism ce presupune un \textit{overhead} minimal, iar de obicei alegerea utilizată este protocolul HTTP\cite{onmicro}. Motivația principală ce stă la baza acestui tip de arhitectură constă în posibilitatea de a pune în producție fiecare dintre aceste servicii \textbf{independent} de celelalte, iar acest lucru implică o viteză crescută de dezvoltare.
 
 \index{microservicii}
 \begin{definition}
@@ -110,7 +110,7 @@ Deși prezintă o serie de dezavantaje, lucrarea consideră că stilul arhitectu
 
 \section{Principii arhitecturale}
 
-Secțiunea anterioară a justificat motivele utilizării unei arhitecturi bazate pe microservicii. În cele ce urmează următoare vom defini un set de principii pe care le vom adopta în dezvoltarea sistemului, împreună cu motivația pentru alegerea acestora. Prin stabilirea principiilor, ne vom facilita misiunea de a segmenta serviciul de experimentare, indentificând modulele componente, acest pas fiind cel mai important și totodată dificil, în elaborarea arhitecturii.
+Secțiunea anterioară a justificat motivele utilizării unei arhitecturi bazate pe microservicii. În cele ce urmează vom defini un set de principii pe care le vom adopta în dezvoltarea sistemului, împreună cu motivația pentru alegerea acestora. Prin stabilirea principiilor, ne vom facilita misiunea de a segmenta serviciul de experimentare, indentificând modulele componente, acest pas fiind cel mai important și totodată dificil, în elaborarea arhitecturii.
 
 \subsubsection{Servicii \textit{stateless}}
 
@@ -121,7 +121,7 @@ Vom impune o regulă generală, și anume ca toate serviciile să fie considerat
 
 Principiul separării datelor sugerează ca fiecare microserviciu să își gestioneze datele prin folosirea unei baze de date proprii. De aceea, fiecare serviciu va alege tipul de bază de date care este cel mai potrivit pentru acesta. De exemplu un serviciu ce permite operații CRUD \textit{(create, read, updated, delete)} va folosi un RDBMS \textit{(Relational Database Management System)}, în timp ce un serviciu de autenficare poate utiliza o bază de date No-SQL. 
 
-Motivul principal pentru implementarea ideilor formulate de acest principiu, este acela că folosirea unei baze date date comune ar duce la dependențe între microservicii, provocate de folosirea comună a aceleași schema a bazei de date. Astfel, daca un serviciu solicită modificarea schemi, restul serviciilor care o folosesc vor trebui să fie actualizate, și astfel pierdem din flexibilitatea arhitecturii. Pe de altă parte există posibilitatea de a avea inconsistențe între diferitele baze de date. Pentru soluționarea acestei probleme există așa numitele unelte \textit{Master Data Management}. Acestea efectuează verificări periodice și oferă alerte administratorilor de sistem, și sincronizează bazele de date.
+Motivul principal pentru implementarea ideilor formulate de acest principiu, este acela că folosirea unei baze date comune ar duce la dependențe între microservicii, cauzate de folosirea comună a aceleași scheme a bazei de date. Astfel, daca un serviciu solicită modificarea schemi, restul serviciilor care o folosesc vor trebui să fie actualizate, și astfel pierdem din flexibilitatea arhitecturii. Pe de altă parte există posibilitatea de a avea inconsistențe între diferitele baze de date. Pentru soluționarea acestei probleme există așa numitele unelte \textit{Master Data Management}. Acestea efectuează verificări periodice și oferă alerte administratorilor de sistem, și sincronizează bazele de date.
 
 \subsubsection{Asocierea serviciu-\textit{container}}
 
